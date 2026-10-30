@@ -67,7 +67,8 @@ def render_lifecycle() -> None:
         st.info("No documents registered. Run `compdoc ingest`.")
         return
     ids = [d["doc_id"] for d in docs]
-    did = st.selectbox("Document", ids, format_func=lambda x: next(
+    pre = st.session_state.get("lc_doc")
+    did = st.selectbox("Document", ids, index=ids.index(pre) if pre in ids else 0, format_func=lambda x: next(
         f"{d['doc_id']} · {d['trader_id']} · {d['doc_date']} · {d['title']} ({d['format']})" for d in docs if d["doc_id"] == x))
     d = next(x for x in docs if x["doc_id"] == did)
     qc = jl(d["qc_json"]) or {}

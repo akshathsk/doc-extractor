@@ -20,8 +20,8 @@ from compdoc.config import settings  # noqa: E402
 from compdoc.db import q, q1  # noqa: E402
 
 st.set_page_config(page_title="compdoc · Dev Console", layout="wide")
-PAGES = ["Ask & trace", "Document lifecycle", "Runs", "Run detail", "State inspector", "Data explorer", "Playground", "Prompts & evals"]
-page = st.sidebar.radio("Dev Console", PAGES, index=PAGES.index(st.session_state.get("page", "Ask & trace")))
+PAGES = ["End-to-end", "Ask & trace", "Document lifecycle", "Runs", "Run detail", "State inspector", "Data explorer", "Playground", "Prompts & evals"]
+page = st.sidebar.radio("Dev Console", PAGES, index=PAGES.index(st.session_state.get("page", "End-to-end")))
 st.session_state["page"] = page
 st.sidebar.caption(f"DB: `{settings.db_path}`  \nprovider **{settings.provider}** · `{settings.agent_model}` / `{settings.fast_model}`")
 
@@ -225,6 +225,10 @@ if page == "Ask & trace":
         st.info("No chat runs yet - ask a question above.")
 
 # ===================================================================================== Document lifecycle
+elif page == "End-to-end":
+    from e2e import render_e2e
+    render_e2e()
+
 elif page == "Document lifecycle":
     from lifecycle import render_lifecycle
     render_lifecycle()

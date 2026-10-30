@@ -127,7 +127,11 @@ def chat_turn(message: str, caller: str = "system", history: list[dict] | None =
         with span("tool", "build_citations", input={"tool_calls": len(calls)}) as s:
             citations = build_citations(answer, calls, caller)
             s.output = citations
-        set_run_status(run_id, "ok", {"route": r.route, "answer": answer[:2000], "citations": citations})
+        set_run_status(run_id, "ok", {"route": r.route, "trader_id": r.trader_id, "answer": answer[:2000], "citations": citations})
+        if r.trader_id:  # lets the Dev Console find questions asked about a trader
+            from ..db import tx
+            with tx() as c:
+                c.execute("UPDATE runs SET trader_id=? WHERE run_id=?", (r.trader_id, run_id))
         return {"run_id": run_id, "route": r.route, "trader_id": r.trader_id, "answer": answer, "citations": citations}
 
 
