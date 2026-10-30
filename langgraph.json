@@ -1,0 +1,5 @@
+{
+  "dependencies": ["."],
+  "graphs": {"extract": "./src/compdoc/graph.py:graph_for_studio"},
+  "env": ".env"
+}

@@ -1,0 +1,47 @@
+# Fixed top-level terms and sub-terms; leaf keys are open (these are the known ones, with hints).
+# Anything an agent cannot place goes under Other.General.
+terms:
+  Compensation:
+    description: Cash compensation - salary, payout formula, hurdles, high-water mark, netting.
+    sub_terms:
+      Base: {leaves: {base_salary: {unit: usd, hint: annual base salary}}}
+      Payout: {leaves: {payout_pct_net_pnl: {unit: pct, hint: payout percentage of net trading P&L}}}
+      Hurdle: {leaves: {hurdle_amount: {unit: usd, hint: P&L hurdle before payout accrues}}}
+      HighWaterMark: {leaves: {hwm_applies: {unit: bool, hint: whether a high-water mark applies}}}
+      Netting: {leaves: {netting_scope: {unit: text, hint: "level at which P&L is netted - the level name only, e.g. 'desk' or 'individual book' (not 'desk level')"}}}
+  Deferral:
+    description: Deferred compensation - deferral percentage, threshold, vesting.
+    sub_terms:
+      Schedule:
+        leaves:
+          deferral_pct: {unit: pct, hint: percentage of payout deferred}
+          deferral_threshold: {unit: usd, hint: payout amount above which deferral applies}
+      Vesting:
+        leaves:
+          vesting_years: {unit: years, hint: number of years deferred amounts vest over}
+          vesting_type: {unit: text, hint: "exactly 'cliff' or 'pro-rata'"}
+  Clawback:
+    description: Recovery of paid compensation.
+    sub_terms:
+      Terms: {leaves: {clawback_lookback_years: {unit: years, hint: lookback period for clawback}}}
+  Guarantee:
+    description: Guaranteed minimum payouts and recoverable draws.
+    sub_terms:
+      Guarantee: {leaves: {guaranteed_min_payout: {unit: usd, hint: guaranteed minimum payout}}}
+      Draw: {leaves: {draw_amount: {unit: usd, hint: recoverable draw against payout}}}
+  RestrictiveCovenants:
+    description: Post-employment restrictions.
+    sub_terms:
+      NonCompete: {leaves: {noncompete_months: {unit: months, hint: non-compete period after termination}}}
+      NonSolicit: {leaves: {nonsolicit_months: {unit: months, hint: non-solicit period after termination}}}
+  Termination:
+    description: Notice and garden leave.
+    sub_terms:
+      Notice:
+        leaves:
+          notice_period_days: {unit: days, hint: written notice period}
+          garden_leave_days: {unit: days, hint: maximum garden leave}
+  Other:
+    description: Anything that does not fit the taxonomy.
+    sub_terms:
+      General: {leaves: {}}
