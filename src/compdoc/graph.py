@@ -1,7 +1,7 @@
 """Extraction graph (LangGraph).
 
-    orchestrator ──Send×N──► researcher(term) ──► reconciler ──► human_review? ──► summarize_publish
-                                                         (interrupt when conflicts remain)
+    orchestrator ─► router ─Send×N─► doc_reader(document, term group) ─► coverage ─(gaps? one more round)─►
+                    reconciler ─► human_review? ─► summarize_publish   (interrupt when conflicts remain)
 
 State is checkpointed in var/checkpoints.db (thread_id = run_id), so a run paused for review can be resumed later,
 from another process (UI/API), and inspected step by step in the Dev Console.
@@ -19,16 +19,15 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.types import Send, interrupt
 
 from .agents.reconciler import propose_resolutions, reconcile_run
-from .agents.researcher import run_researcher
+from .agents.doc_reader import coverage_gaps, route, run_doc_reader
 from .agents.summarizer import summarize
 from .config import settings
 from .db import audit, j, tx
 from .observability import in_run, span
-from .schemas import TraderExtract, taxonomy
+from .schemas import TraderExtract
 from .tools.docs import list_trader_docs
 from .tools.extracts import publish_extract
 from .tools.reconcile import conflict_payload, open_conflicts
-from .tools.search import search_sections
 
 
 class ExtractState(TypedDict, total=False):
@@ -37,7 +36,11 @@ class ExtractState(TypedDict, total=False):
     caller: str
     inventory: list[dict]
     terms: list[str]
-    term: str  # set on Send to a researcher
+    items: list[dict]  # work items from the router
+    item: dict  # set on Send to a doc reader
+    round: int
+    coverage_round: int
+    gaps: list[dict]
     reports: Annotated[list[dict], operator.add]
     resolutions: dict[str, dict]
     extract: dict
@@ -48,8 +51,10 @@ class ExtractState(TypedDict, total=False):
 def _node(name: str):
     def deco(fn):
         def wrapper(state: ExtractState) -> dict:
-            with in_run(state["run_id"]), span("node", name, input={k: v for k, v in state.items()
-                                                                       if k in ("trader_id", "term", "terms", "resolutions")}) as s:
+            inp = {k: v for k, v in state.items() if k in ("trader_id", "resolutions", "round")}
+            if "item" in state:
+                inp |= {"doc_id": state["item"]["doc_id"], "terms": state["item"]["terms"]}
+            with in_run(state["run_id"]), span("node", name, input=inp) as s:
                 out = fn(state)
                 s.output = out
                 return out
@@ -60,39 +65,50 @@ def _node(name: str):
 
 @_node("orchestrator")
 def orchestrator(state: ExtractState) -> dict:
-    """Builds the document inventory and picks which term researchers to start.
-    A term is researched if any document's enrichment covers it, or keyword search finds it (tag-miss backstop)."""
+    """Document inventory for the trader."""
     tid = state["trader_id"]
     with span("tool", "list_trader_docs", input={"trader_id": tid}) as s:
         inv = list_trader_docs(tid, state.get("caller", "system"))
         s.output = inv
     if not inv:
         raise ValueError(f"no documents registered for {tid}")
-    covered = {t for d in inv for t in (d.get("terms_covered") or [])}
-    terms = []
-    for term, tdef in taxonomy().items():
-        if term == "Other":
-            continue
-        if term in covered:
-            terms.append(term)
-            continue
-        hint = " ".join(v.get("hint", "") for sv in tdef["sub_terms"].values() for v in (sv.get("leaves") or {}).values())
-        with span("tool", "search_sections", input={"query": hint, "trader_id": tid}) as s:
-            hits = search_sections(hint, tid, top_k=3)
-            s.output = hits
-        if hits and hits[0]["score"] > 6:
-            terms.append(term)
-    return {"inventory": inv, "terms": terms}
+    return {"inventory": inv}
+
+
+@_node("router")
+def router(state: ExtractState) -> dict:
+    """Coverage router (code): relevant (document, term group) work items, each with a fused candidate shortlist."""
+    with span("tool", "route_work_items", input={"documents": len(state["inventory"])}) as s:
+        items = route(state["trader_id"], state["inventory"])
+        s.output = [{"doc_id": i["doc_id"], "terms": i["terms"], "shortlist": len(i["shortlist"]), "evidence": i["evidence"]}
+                    for i in items]
+    return {"items": items, "coverage_round": 1}
 
 
 def fan_out(state: ExtractState) -> list[Send]:
-    return [Send("researcher", {"run_id": state["run_id"], "trader_id": state["trader_id"], "term": t,
-                                "inventory": state["inventory"]}) for t in state["terms"]]
+    return [Send("doc_reader", {"run_id": state["run_id"], "trader_id": state["trader_id"], "item": it, "round": 1})
+            for it in state["items"]]
 
 
-@_node("researcher")
-def researcher(state: ExtractState) -> dict:
-    return {"reports": [run_researcher(state["trader_id"], state["term"], state["inventory"])]}
+@_node("doc_reader")
+def doc_reader(state: ExtractState) -> dict:
+    return {"reports": [run_doc_reader(state["trader_id"], state["item"], state.get("round", 1))]}
+
+
+@_node("coverage")
+def coverage(state: ExtractState) -> dict:
+    """Coverage check (code): strong evidence that no reader read and no finding covers -> one more round."""
+    with span("tool", "coverage_check", input={"round": state.get("coverage_round", 1)}) as s:
+        gaps = coverage_gaps(state["trader_id"], state["items"], state.get("reports", []))
+        s.output = [{"doc_id": g["doc_id"], "terms": g["terms"], "reason": g["gap_reason"]} for g in gaps]
+    return {"gaps": gaps, "coverage_round": state.get("coverage_round", 1) + 1}
+
+
+def after_coverage(state: ExtractState):
+    if state.get("gaps") and state.get("coverage_round", 2) <= 2:
+        return [Send("doc_reader", {"run_id": state["run_id"], "trader_id": state["trader_id"], "item": g, "round": 2})
+                for g in state["gaps"]]
+    return "reconciler"
 
 
 @_node("reconciler")
@@ -159,13 +175,17 @@ def summarize_publish(state: ExtractState) -> dict:
 def build_graph() -> StateGraph:
     g = StateGraph(ExtractState)
     g.add_node("orchestrator", orchestrator)
-    g.add_node("researcher", researcher)
+    g.add_node("router", router)
+    g.add_node("doc_reader", doc_reader)
+    g.add_node("coverage", coverage)
     g.add_node("reconciler", reconciler)
     g.add_node("human_review", human_review)
     g.add_node("summarize_publish", summarize_publish)
     g.add_edge(START, "orchestrator")
-    g.add_conditional_edges("orchestrator", fan_out, ["researcher"])
-    g.add_edge("researcher", "reconciler")
+    g.add_edge("orchestrator", "router")
+    g.add_conditional_edges("router", fan_out, ["doc_reader"])
+    g.add_edge("doc_reader", "coverage")
+    g.add_conditional_edges("coverage", after_coverage, ["doc_reader", "reconciler"])
     g.add_conditional_edges("reconciler", needs_review, ["human_review", "summarize_publish"])
     g.add_edge("human_review", "summarize_publish")
     g.add_edge("summarize_publish", END)

@@ -25,6 +25,7 @@ dependencies = [
     "mcp>=1.10",
     "openai>=3.41.0",
     "ocrmac>=1.0.1",
+    "sentence-transformers>=6.2.0",
 ]
 
 [project.scripts]

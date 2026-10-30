@@ -20,7 +20,11 @@ ROLES = {
     "term_finder": ("🔎 Term Finder agent", "LLM agent", "Finds which documents/traders contain a term and its wording variants."),
     "drafter": ("📝 Drafting agent", "LLM agent", "Drafts a document from precedent clauses."),
     "build_citations": ("📎 Citation builder", "code", "Turns the sources the agent actually read into citations, keeping only those the answer refers to."),
-    "orchestrator": ("🗂️ Orchestrator", "code", "Lists the trader's documents and decides which Term Researchers to start."),
+    "orchestrator": ("🗂️ Orchestrator", "code", "Lists the trader's documents."),
+    "router": ("🧭 Coverage router", "code", "Decides which documents touch which terms (tags, keyword + semantic agreement) and "
+               "builds one work item per (document, term group) with a fused candidate shortlist."),
+    "coverage": ("✅ Coverage check", "code", "Looks for strong evidence of a term that no Doc Reader read and no finding covers; "
+                 "re-queues it once."),
     "reconciler": ("⚖️ Reconciler", "code + LLM", "Applies date rules to all findings; asks the LLM only about conflicts."),
     "summarize_publish": ("📰 Summarizer & publisher", "LLM + code", "Writes the summary and publishes a new extract version."),
     "human_review:requested": ("🙋 Human review requested", "pause", "Conflicts remain - the run pauses for a person."),
@@ -29,6 +33,11 @@ ROLES = {
 
 
 def role(name: str) -> tuple[str, str, str]:
+    if name.startswith("doc_reader:"):
+        _, doc, terms, *rest = name.split(":") + [""]
+        return (f"📄 Doc Reader · {doc} · {terms.replace('+', ', ')}" + (" (coverage re-check)" if rest and rest[0] else ""),
+                "LLM agent", f"Reads ONE document ({doc}) for {terms.replace('+', ', ')}: shortlist + two-level outline, "
+                "chooses sections, reads them, records every value with a quote.")
     if name.startswith("researcher:"):
         term = name.split(":", 1)[1]
         return (f"🔬 Term Researcher · {term}", "LLM agent",

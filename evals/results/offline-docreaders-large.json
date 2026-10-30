@@ -1,0 +1,97 @@
+{
+  "summary": {
+    "leaf_precision": 0.709,
+    "leaf_recall": 0.625,
+    "leaf_f1": 0.66,
+    "current_value_acc": 0.625,
+    "finding_recall": 0.73,
+    "citation_validity": 1.0,
+    "conflict_recall": null,
+    "conflict_precision": null,
+    "term_tag_recall": 1.0,
+    "total_cost_usd": 0,
+    "total_tool_calls": 45,
+    "provider": "offline",
+    "agent_model": "gpt-5.5",
+    "fast_model": "gpt-5.4-mini",
+    "at": "2026-10-30T15:17:14"
+  },
+  "traders": [
+    {
+      "trader_id": "T-2001",
+      "run_id": "extract-0a2f62e32c",
+      "status": "published",
+      "leaf_precision": 0.75,
+      "leaf_recall": 0.75,
+      "leaf_f1": 0.75,
+      "current_value_acc": 0.75,
+      "finding_recall": 0.846,
+      "citation_validity": 1.0,
+      "conflict_recall": null,
+      "conflict_precision": null,
+      "term_tag_recall": 1.0,
+      "tool_calls": 24,
+      "llm_calls": 1,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "cost_usd": 0,
+      "latency_s": 6.6,
+      "extra_leaves": [],
+      "wrong": [
+        {
+          "path": "Compensation.Payout.payout_pct_net_pnl",
+          "gold": 17,
+          "got": 16
+        },
+        {
+          "path": "Deferral.Schedule.deferral_pct",
+          "gold": 35,
+          "got": 30
+        }
+      ]
+    },
+    {
+      "trader_id": "T-2002",
+      "run_id": "extract-dfc18710b1",
+      "status": "published",
+      "leaf_precision": 0.667,
+      "leaf_recall": 0.5,
+      "leaf_f1": 0.571,
+      "current_value_acc": 0.5,
+      "finding_recall": 0.615,
+      "citation_validity": 1.0,
+      "conflict_recall": null,
+      "conflict_precision": null,
+      "term_tag_recall": 1.0,
+      "tool_calls": 21,
+      "llm_calls": 1,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "cost_usd": 0,
+      "latency_s": 0.4,
+      "extra_leaves": [],
+      "wrong": [
+        {
+          "path": "Compensation.Base.base_salary",
+          "gold": 300000,
+          "got": null
+        },
+        {
+          "path": "Compensation.Payout.payout_pct_net_pnl",
+          "gold": 17,
+          "got": 16
+        },
+        {
+          "path": "Compensation.Hurdle.hurdle_amount",
+          "gold": 2000000,
+          "got": null
+        },
+        {
+          "path": "Deferral.Schedule.deferral_pct",
+          "gold": 35,
+          "got": 30
+        }
+      ]
+    }
+  ]
+}

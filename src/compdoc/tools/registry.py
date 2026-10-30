@@ -137,23 +137,59 @@ def _trader_docs(trader_id: str) -> set[str]:
     return {r["doc_id"] for r in q("SELECT doc_id FROM documents WHERE trader_id=?", (trader_id,))}
 
 
-def researcher_tools(trader_id: str, agent: str) -> list[Tool]:
+class SectionOnlyIn(BaseModel):
+    section_id: str
+
+
+class DocChoice(BaseModel):
+    section_id: str
+    reason: str = Field(description="Why this section is relevant (one short sentence)")
+
+
+class DocChooseIn(BaseModel):
+    choices: list[DocChoice] = Field(description="Sections of this document chosen to read, each with a reason")
+
+
+class ArticleIn(BaseModel):
+    article_id: str = Field(description="section_id of an article from the article outline, e.g. 'L1-001:sart8'")
+
+
+class QueryIn(BaseModel):
+    query: str = Field(description="Your own words for what you are looking for")
+    top_k: int = Field(8, ge=1, le=20)
+
+
+class DocRecordIn(BaseModel):
+    path: str = Field(description="Term.SubTerm.leaf_key, e.g. 'Compensation.Payout.payout_pct_net_pnl'")
+    value: Scalar = Field(description="Normalised value: number for %, money, periods; true/false; short text; null if removed")
+    unit: str | None = Field(None, description="pct | usd | months | years | days | bool | text")
+    quote: str = Field(description="Exact verbatim quote from the section text containing the value")
+    section_id: str
+    assertion: Literal["set", "removed"] = "set"
+    scope_note: str | None = Field(None, description="Scope limit, e.g. 'Performance Year 2025 only'")
+    effective_date: str | None = Field(None, description="ISO date if the document states its own effective date")
+
+
+def doc_reader_tools(trader_id: str, doc_id: str, agent: str) -> list[Tool]:
+    """Bound to ONE document: a Doc Reader cannot read or record anything outside it."""
+    from . import hybrid
+
+    def mine(sid: str) -> bool:
+        return sid.startswith(doc_id + ":")
     return [
-        Tool("get_section_outlines", "STEP 1. Outlines (clause number, heading, summary, tags - no body text) of the given "
-             "documents. Use this to decide which sections matter.", OutlinesIn,
-             lambda doc_ids: docs.get_section_outlines([d for d in doc_ids if d in _trader_docs(trader_id)])),
-        Tool("read_chosen_sections", "STEP 2. Read the full text of the sections you chose from the outlines, with a reason "
-             "for each choice. Base findings only on text returned here or by read_section.", ChooseIn,
-             lambda choices: docs.read_chosen_sections([c for c in choices if c["doc_id"] in _trader_docs(trader_id)])),
-        _read("system"),
-        Tool("search_sections", f"BACKSTOP. BM25 keyword search over {trader_id}'s sections, to check nothing was missed "
-             "after reading the outlines.", SearchIn,
-             lambda query, doc_ids=None, top_k=8: search.search_sections(query, trader_id, doc_ids, top_k)),
-        Tool("find_sections_by_term", f"BACKSTOP. Sections of {trader_id}'s documents tagged with a term or sub-term.",
-             TermPathIn, lambda term_path: docs.find_sections_by_term(trader_id, term_path)),
-        Tool("record_finding", "Record one value found in a section into the evidence ledger (call once per value per section). "
-             "The quote is verified against the section text.", RecordIn,
-             lambda **kw: ledger.record_finding(trader_id=trader_id, agent=agent, **kw)),
+        Tool("get_article_sections", "Level 2 of the outline: the sections inside one article (number, heading, summary, tags; "
+             "no body text).", ArticleIn, lambda article_id: docs.get_article_sections(doc_id, article_id)),
+        Tool("read_chosen_sections", "Read the full text of the sections you chose, each with a reason. Base findings only on text "
+             "returned here or by read_section.", DocChooseIn,
+             lambda choices: docs.read_chosen_sections([{**c, "doc_id": doc_id} for c in choices if mine(c["section_id"])])),
+        Tool("read_section", "Read one more section of this document (e.g. a cross-referenced clause or schedule).", SectionOnlyIn,
+             lambda section_id: docs.read_section(doc_id, section_id) if mine(section_id) else {"error": "other document"}),
+        Tool("search_in_doc", "Hybrid search (tags + keyword + semantic) inside this document, in your own words.", QueryIn,
+             lambda query, top_k=8: hybrid.hybrid_search(query=query, doc_ids=[doc_id], top_k=top_k)),
+        Tool("record_finding", "Record one value found in a section of this document (once per value per section). "
+             "The quote is verified against the section text.", DocRecordIn,
+             lambda **kw: ledger.record_finding(trader_id=trader_id, agent=agent, doc_id=doc_id, **kw)
+             if mine(kw["section_id"]) else {"recorded": False, "error": f"{kw['section_id']} is not in {doc_id}"}),
     ]
 
 

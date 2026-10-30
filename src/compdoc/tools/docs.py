@@ -114,3 +114,55 @@ def read_chosen_sections(choices: list[dict], caller: str = "system") -> list[di
         except (KeyError, Exception) as e:  # noqa: BLE001
             out.append({"doc_id": c.get("doc_id"), "section_id": c.get("section_id"), "error": str(e)})
     return out
+
+
+def _descendants(doc_id: str) -> dict[str, list[dict]]:
+    rows = q("SELECT section_id, parent_id, number, heading, level, pages_json, summary, term_tags_json FROM sections "
+             "WHERE doc_id=? ORDER BY ord", (doc_id,))
+    kids: dict[str, list[dict]] = {}
+    for r in rows:
+        if r["parent_id"]:
+            kids.setdefault(r["parent_id"], []).append(r)
+    return {"rows": rows, "kids": kids}  # type: ignore[return-value]
+
+
+def get_article_outline(doc_id: str, caller: str = "system") -> list[dict]:
+    """Level 1 of the two-level outline: one line per article / schedule / part, with its summary and the term tags
+    of everything inside it. ~15-30 lines even for a 200-page agreement."""
+    require(caller, _trader_of_doc(doc_id))
+    d = _descendants(doc_id)
+    arts = {r["section_id"]: r["summary"] for r in q("SELECT section_id, summary FROM article_enrichment WHERE doc_id=?", (doc_id,))}
+
+    def walk(sid: str) -> list[dict]:
+        out = []
+        for c in d["kids"].get(sid, []):
+            out.append(c)
+            out += walk(c["section_id"])
+        return out
+    outline = []
+    for r in d["rows"]:
+        if r["level"] != 1:
+            continue
+        inside = walk(r["section_id"])
+        tags = sorted({t for x in [r] + inside for t in json.loads(x["term_tags_json"] or "[]")})
+        outline.append({"section_id": r["section_id"], "number": r["number"], "heading": r["heading"],
+                        "sections_inside": len(inside), "pages": json.loads(r["pages_json"])[:1] + json.loads(inside[-1]["pages_json"])[-1:] if inside else json.loads(r["pages_json"]),
+                        "summary": ((arts.get(r["section_id"]) or r["summary"] or "")[:180]), "term_tags": tags})
+    return outline
+
+
+def get_article_sections(doc_id: str, article_id: str, caller: str = "system") -> list[dict]:
+    """Level 2: the sections inside one article (number, heading, summary, tags) - no body text."""
+    require(caller, _trader_of_doc(doc_id))
+    d = _descendants(doc_id)
+
+    def walk(sid: str, depth: int) -> list[dict]:
+        out = []
+        for c in d["kids"].get(sid, []):
+            out.append({"section_id": c["section_id"], "number": c["number"], "heading": c["heading"], "depth": depth,
+                        "summary": c["summary"], "term_tags": json.loads(c["term_tags_json"] or "[]")})
+            out += walk(c["section_id"], depth + 1)
+        return out
+    if not any(r["section_id"] == article_id for r in d["rows"]):
+        raise KeyError(f"{article_id} not in {doc_id}")
+    return walk(article_id, 1)

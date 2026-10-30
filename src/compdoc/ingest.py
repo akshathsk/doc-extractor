@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import time
 from datetime import datetime, timezone
@@ -342,6 +343,10 @@ def ingest_document(doc_id: str, enrich: bool = True, force: bool = False) -> di
         if enrich:
             from .agents.digitizer import enrich_document
             result["enrichment"] = enrich_document(doc_id, force=force)
+        if os.environ.get("COMPDOC_EMBED", "1") == "1":  # Part 3: local embeddings for hybrid search (cached by hash)
+            from .tools.hybrid import embed_doc
+            with span("node", f"embed:{doc_id}") as es:
+                result["embeddings"] = es.output = embed_doc(doc_id)
         s.output = result
     audit("ingest", "document_ingested", d["trader_id"], doc_id=doc_id, result=result)
     return result

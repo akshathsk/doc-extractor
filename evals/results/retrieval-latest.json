@@ -1,0 +1,331 @@
+{
+  "summary": {
+    "all": {
+      "n": 26,
+      "tags": 1.0,
+      "bm25@1": 0.846,
+      "bm25@3": 1.0,
+      "bm25@5": 1.0,
+      "semantic@1": 0.769,
+      "semantic@3": 0.808,
+      "semantic@5": 0.923,
+      "hybrid@1": 0.923,
+      "hybrid@3": 1.0,
+      "hybrid@5": 1.0
+    },
+    "plain wording": {
+      "n": 19,
+      "tags": 1.0,
+      "bm25@1": 0.895,
+      "bm25@3": 1.0,
+      "bm25@5": 1.0,
+      "semantic@1": 0.789,
+      "semantic@3": 0.842,
+      "semantic@5": 1.0,
+      "hybrid@1": 0.895,
+      "hybrid@3": 1.0,
+      "hybrid@5": 1.0
+    },
+    "paraphrased": {
+      "n": 7,
+      "tags": 1.0,
+      "bm25@1": 0.714,
+      "bm25@3": 1.0,
+      "bm25@5": 1.0,
+      "semantic@1": 0.714,
+      "semantic@3": 0.714,
+      "semantic@5": 0.714,
+      "hybrid@1": 1.0,
+      "hybrid@3": 1.0,
+      "hybrid@5": 1.0
+    }
+  },
+  "rows": [
+    {
+      "doc": "L1-001",
+      "path": "Compensation.Base.base_salary",
+      "paraphrased": false,
+      "gold": "L1-001:s8.1",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 1,
+      "semantic": 5,
+      "hybrid": 1
+    },
+    {
+      "doc": "L1-001",
+      "path": "Compensation.Payout.payout_pct_net_pnl",
+      "paraphrased": false,
+      "gold": "L1-001:s8.2",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L1-001",
+      "path": "Compensation.Hurdle.hurdle_amount",
+      "paraphrased": false,
+      "gold": "L1-001:s8.3",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 1,
+      "semantic": 3,
+      "hybrid": 1
+    },
+    {
+      "doc": "L1-001",
+      "path": "Deferral.Schedule.deferral_pct",
+      "paraphrased": false,
+      "gold": "L1-001:s9.1",
+      "tagged": true,
+      "n_tagged": 4,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L1-001",
+      "path": "Deferral.Vesting.vesting_years",
+      "paraphrased": false,
+      "gold": "L1-001:s9.2",
+      "tagged": true,
+      "n_tagged": 2,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L1-001",
+      "path": "Clawback.Terms.clawback_lookback_years",
+      "paraphrased": false,
+      "gold": "L1-001:s10.1",
+      "tagged": true,
+      "n_tagged": 2,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L1-001",
+      "path": "RestrictiveCovenants.NonCompete.noncompete_months",
+      "paraphrased": false,
+      "gold": "L1-001:s11.1",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 3,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L1-001",
+      "path": "Termination.Notice.notice_period_days",
+      "paraphrased": false,
+      "gold": "L1-001:s12.1",
+      "tagged": true,
+      "n_tagged": 145,
+      "bm25": 1,
+      "semantic": 5,
+      "hybrid": 2
+    },
+    {
+      "doc": "L1-002",
+      "path": "Compensation.Payout.payout_pct_net_pnl",
+      "paraphrased": false,
+      "gold": "L1-002:s1.1",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L1-003",
+      "path": "Deferral.Schedule.deferral_pct",
+      "paraphrased": true,
+      "gold": "L1-003:s1.1",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L1-004",
+      "path": "Deferral.Vesting.vesting_years",
+      "paraphrased": false,
+      "gold": "L1-004:s1.1",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L1-005",
+      "path": "Compensation.Payout.payout_pct_net_pnl",
+      "paraphrased": true,
+      "gold": "L1-005:s1.1",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L1-006",
+      "path": "RestrictiveCovenants.NonCompete.noncompete_months",
+      "paraphrased": false,
+      "gold": "L1-006:s1.1",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L2-001",
+      "path": "Compensation.Base.base_salary",
+      "paraphrased": true,
+      "gold": "L2-001:s8.1",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 1,
+      "semantic": 7,
+      "hybrid": 1
+    },
+    {
+      "doc": "L2-001",
+      "path": "Compensation.Payout.payout_pct_net_pnl",
+      "paraphrased": true,
+      "gold": "L2-001:s8.2",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 2,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L2-001",
+      "path": "Compensation.Hurdle.hurdle_amount",
+      "paraphrased": true,
+      "gold": "L2-001:s8.3",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 3,
+      "semantic": 6,
+      "hybrid": 1
+    },
+    {
+      "doc": "L2-001",
+      "path": "Deferral.Schedule.deferral_pct",
+      "paraphrased": false,
+      "gold": "L2-001:s9.1",
+      "tagged": true,
+      "n_tagged": 4,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L2-001",
+      "path": "Deferral.Vesting.vesting_years",
+      "paraphrased": false,
+      "gold": "L2-001:s9.2",
+      "tagged": true,
+      "n_tagged": 2,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L2-001",
+      "path": "Clawback.Terms.clawback_lookback_years",
+      "paraphrased": false,
+      "gold": "L2-001:s10.1",
+      "tagged": true,
+      "n_tagged": 2,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L2-001",
+      "path": "RestrictiveCovenants.NonCompete.noncompete_months",
+      "paraphrased": false,
+      "gold": "L2-001:s11.1",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 3,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L2-001",
+      "path": "Termination.Notice.notice_period_days",
+      "paraphrased": false,
+      "gold": "L2-001:s12.1",
+      "tagged": true,
+      "n_tagged": 150,
+      "bm25": 1,
+      "semantic": 5,
+      "hybrid": 2
+    },
+    {
+      "doc": "L2-002",
+      "path": "Compensation.Payout.payout_pct_net_pnl",
+      "paraphrased": false,
+      "gold": "L2-002:s1.1",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L2-003",
+      "path": "Deferral.Schedule.deferral_pct",
+      "paraphrased": true,
+      "gold": "L2-003:s1.1",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L2-004",
+      "path": "Deferral.Vesting.vesting_years",
+      "paraphrased": false,
+      "gold": "L2-004:s1.1",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L2-005",
+      "path": "Compensation.Payout.payout_pct_net_pnl",
+      "paraphrased": true,
+      "gold": "L2-005:s1.1",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    },
+    {
+      "doc": "L2-006",
+      "path": "RestrictiveCovenants.NonCompete.noncompete_months",
+      "paraphrased": false,
+      "gold": "L2-006:s1.1",
+      "tagged": true,
+      "n_tagged": 1,
+      "bm25": 1,
+      "semantic": 1,
+      "hybrid": 1
+    }
+  ]
+}
