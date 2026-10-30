@@ -1,0 +1,113 @@
+{
+  "trader_id": "T-2001",
+  "current": {
+    "Compensation.Base.base_salary": {
+      "value": 300000,
+      "doc_id": "L1-001",
+      "effective": "2021-01-15"
+    },
+    "Compensation.Payout.payout_pct_net_pnl": {
+      "value": 17,
+      "doc_id": "L1-005",
+      "effective": "2023-02-01"
+    },
+    "Compensation.Hurdle.hurdle_amount": {
+      "value": 2000000,
+      "doc_id": "L1-001",
+      "effective": "2021-01-15"
+    },
+    "Deferral.Schedule.deferral_pct": {
+      "value": 35,
+      "doc_id": "L1-003",
+      "effective": "2022-04-01"
+    },
+    "Deferral.Vesting.vesting_years": {
+      "value": 4,
+      "doc_id": "L1-004",
+      "effective": "2022-09-01"
+    },
+    "Clawback.Terms.clawback_lookback_years": {
+      "value": 3,
+      "doc_id": "L1-001",
+      "effective": "2021-01-15"
+    },
+    "RestrictiveCovenants.NonCompete.noncompete_months": {
+      "value": 12,
+      "doc_id": "L1-006",
+      "effective": "2023-07-01"
+    },
+    "Termination.Notice.notice_period_days": {
+      "value": 60,
+      "doc_id": "L1-001",
+      "effective": "2021-01-15"
+    }
+  },
+  "expected_conflicts": [],
+  "findings": [
+    {
+      "doc_id": "L1-001",
+      "path": "Compensation.Base.base_salary",
+      "value": 300000
+    },
+    {
+      "doc_id": "L1-001",
+      "path": "Compensation.Payout.payout_pct_net_pnl",
+      "value": 15
+    },
+    {
+      "doc_id": "L1-001",
+      "path": "Compensation.Hurdle.hurdle_amount",
+      "value": 2000000
+    },
+    {
+      "doc_id": "L1-001",
+      "path": "Deferral.Schedule.deferral_pct",
+      "value": 30
+    },
+    {
+      "doc_id": "L1-001",
+      "path": "Deferral.Vesting.vesting_years",
+      "value": 3
+    },
+    {
+      "doc_id": "L1-001",
+      "path": "Clawback.Terms.clawback_lookback_years",
+      "value": 3
+    },
+    {
+      "doc_id": "L1-001",
+      "path": "RestrictiveCovenants.NonCompete.noncompete_months",
+      "value": 9
+    },
+    {
+      "doc_id": "L1-001",
+      "path": "Termination.Notice.notice_period_days",
+      "value": 60
+    },
+    {
+      "doc_id": "L1-002",
+      "path": "Compensation.Payout.payout_pct_net_pnl",
+      "value": 16
+    },
+    {
+      "doc_id": "L1-003",
+      "path": "Deferral.Schedule.deferral_pct",
+      "value": 35
+    },
+    {
+      "doc_id": "L1-004",
+      "path": "Deferral.Vesting.vesting_years",
+      "value": 4
+    },
+    {
+      "doc_id": "L1-005",
+      "path": "Compensation.Payout.payout_pct_net_pnl",
+      "value": 17
+    },
+    {
+      "doc_id": "L1-006",
+      "path": "RestrictiveCovenants.NonCompete.noncompete_months",
+      "value": 12
+    }
+  ]
+}

@@ -14,8 +14,15 @@ from .tools.access import require, seed_entitlements
 from .tools.extracts import latest_extract
 
 
-def ingest_all(enrich: bool = True, force: bool = False, doc_ids: list[str] | None = None) -> list[dict]:
-    n = register_from_manifest()
+def ingest_all(enrich: bool = True, force: bool = False, doc_ids: list[str] | None = None, source_dir=None) -> list[dict]:
+    import json
+    from pathlib import Path
+
+    from .config import settings
+    src = Path(source_dir) if source_dir else settings.source_dir
+    n = register_from_manifest(src)
+    registered = {r["doc_id"] for r in json.loads((src / "manifest.json").read_text())}
+    doc_ids = [d for d in (doc_ids or sorted(registered)) if d in registered]  # only this source's documents
     seed_entitlements()
     out = []
     with start_run("ingest", input={"registered": n, "force": force}) as run_id:

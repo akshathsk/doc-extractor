@@ -1,0 +1,74 @@
+[
+  {
+    "id": "L2-004:srecitals",
+    "style": "recitals",
+    "label": "RECITALS",
+    "number": "recitals",
+    "heading": "Recitals",
+    "parent": null,
+    "level": 1
+  },
+  {
+    "id": "L2-004:sart1",
+    "style": "article",
+    "label": "ARTICLE I",
+    "number": "art1",
+    "heading": "AMENDMENTS",
+    "parent": null,
+    "level": 1
+  },
+  {
+    "id": "L2-004:s1.1",
+    "style": "section",
+    "label": "Section 1.01",
+    "number": "1.1",
+    "heading": "Vesting",
+    "parent": "L2-004:sart1",
+    "level": 2
+  },
+  {
+    "id": "L2-004:sart2",
+    "style": "article",
+    "label": "ARTICLE II",
+    "number": "art2",
+    "heading": "GENERAL",
+    "parent": null,
+    "level": 1
+  },
+  {
+    "id": "L2-004:s2.1",
+    "style": "section",
+    "label": "Section 2.01",
+    "number": "2.1",
+    "heading": "Standards",
+    "parent": "L2-004:sart2",
+    "level": 2
+  },
+  {
+    "id": "L2-004:s2.2",
+    "style": "section",
+    "label": "Section 2.02",
+    "number": "2.2",
+    "heading": "Survival",
+    "parent": "L2-004:sart2",
+    "level": 2
+  },
+  {
+    "id": "L2-004:s2.3",
+    "style": "section",
+    "label": "Section 2.03",
+    "number": "2.3",
+    "heading": "Obligations",
+    "parent": "L2-004:sart2",
+    "level": 2
+  },
+  {
+    "id": "L2-004:ssignature",
+    "style": "signature",
+    "label": "SIGNATURES",
+    "number": "signature",
+    "heading": "Signature Page",
+    "parent": null,
+    "level": 1
+  }
+]

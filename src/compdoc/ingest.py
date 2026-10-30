@@ -114,7 +114,13 @@ def _prov(item) -> tuple[list[int], list[dict]]:
 
 
 def build_sections(doc_id: str, doc: DoclingDocument) -> tuple[list[Section], dict]:
-    """Turn Docling's (mostly flat) item list into a numbered clause tree."""
+    """Clause tree for real contracts (structure.py: labels, style stack, attachments, cleanup)."""
+    from .structure import build_sections as _build
+    return _build(doc_id, doc)
+
+
+def build_sections_legacy(doc_id: str, doc: DoclingDocument) -> tuple[list[Section], dict]:
+    """Previous builder (dotted numbers only). Kept for comparison in tests."""
     raw: list[dict] = []  # headings with attached content, in reading order
     cur: dict | None = None
     repaired = 0

@@ -165,12 +165,21 @@ def render_lifecycle() -> None:
     b.dataframe(pd.DataFrame(drops), hide_index=True, use_container_width=True) if drops else b.write("Nothing dropped.")
 
     # 5 ------------------------------------------------------------------------------------------------
-    heads = [x for x in decisions if x["step"] in ("heading", "repair")]
-    b = step(5, "Heading detection & repair", "Docling's PDF output is flat and heading levels are unreliable, so nesting comes from "
-             "clause numbers (`2` → `2.1`). Headings Docling mislabelled as list items are promoted, and headings that lost their "
-             "number get one from their numbered neighbours.", f"`conversions.qc_json` (headings_repaired = {qc.get('headings_repaired')})")
+    heads = [x for x in decisions if x["step"] in ("label", "heading", "repair", "sequence", "duplicate")]
+    b = step(5, "Labels, nesting & repair", "Each heading or clause label is recognised (ARTICLE IV, Section 4.02, 4.2.1, (a), (i), "
+             "Schedule A, WHEREAS...), split from run-in text (`Section 4.02 Payout. The Trader...`), and nested by a style stack: "
+             "article, then decimal depth, then clause styles in the order they first appear. Sibling order is checked; schedules and "
+             "exhibits get their own numbering; headings that lost their number are repaired from their neighbours.",
+             f"`conversions.qc_json` (label styles {qc.get('label_styles')}, sequence issues {qc.get('sequence_issues')}, "
+             f"repaired {qc.get('headings_repaired')})")
     if heads:
-        b.dataframe(pd.DataFrame(heads)[["step", "ref", "label", "number", "text", "reason"]], hide_index=True, use_container_width=True)
+        kinds = Counter(x["step"] for x in heads)
+        b.markdown("  ·  ".join(f"**{k}** ×{v}" for k, v in kinds.items()))
+        show = b.multiselect("Show decisions", sorted(kinds), default=[k for k in kinds if k != "label"] or list(kinds), key="lc-dec")
+        sel = [x for x in heads if x["step"] in show]
+        if sel:
+            b.dataframe(pd.DataFrame(sel).reindex(columns=["step", "ref", "label", "number", "text", "reason"]),
+                        hide_index=True, use_container_width=True)
     n_fixed = sum(1 for x in heads if x["step"] == "repair" or "promoted" in x.get("reason", ""))
     b.success(f"{n_fixed} heading(s) needed fixing." if n_fixed else "All headings came through cleanly.")
 

@@ -38,6 +38,19 @@ Why it won't scale as is:
 
 These timings come from tiny documents. Real 200-page contracts must be benchmarked before sizing hardware (milestone M1).
 
+**M1 benchmark (2026-10-30, `benchmarks/docling_bench.py`, same laptop, CPU, models already downloaded), on a 202-page synthetic agreement:**
+
+| Case | Pages | Seconds per page | Peak memory |
+| --- | --- | --- | --- |
+| Whole file, OCR on (today's settings) | 202 | 0.20 (40 s total) | 2.2 GB |
+| Whole file, OCR off | 202 | 0.21 | 2.0 GB |
+| Digital slice, OCR off / on | 14 | 0.36 / 0.25 | ~1 GB |
+| Table pages, accurate / fast TableFormer | 2 | 1.03 / 0.74 | ~1 GB |
+| Scanned page / fully scanned 8-page doc (OCR) | 1 / 8 | 1.9 / 1.2 | ~1 GB |
+| Model load per process (warm disk cache) | | 6-10 s | |
+
+What this changes: large files convert at **~0.2 s per page**, about 4x faster than the small-file estimate, so one trader's 6,000 pages is ~20 minutes in one process. OCR on digital pages costs almost nothing (Docling only OCRs image regions), so strategy 3 matters little. Small slices cost more per page than large ones (fixed overhead per call), so shards should be ~25-50 pages, not smaller. Each worker needs 1-2 GB of memory.
+
 ## Part 1 · Docling conversion: strategies
 
 **Yes, chunk and fan out: a coordinator splits each PDF into page ranges, a pool of workers converts them in parallel, and the coordinator merges the results.** The installed Docling supports both halves: `convert(source, page_range=(start, end))` converts a slice, and `DoclingDocument.concatenate([...])` joins the slices back into one document.

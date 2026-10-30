@@ -16,10 +16,11 @@ con = Console()
 
 
 @app.command()
-def ingest(force: bool = False, no_enrich: bool = False, doc: list[str] = typer.Option(None, help="Only these doc ids")):
+def ingest(force: bool = False, no_enrich: bool = False, doc: list[str] = typer.Option(None, help="Only these doc ids"),
+           source: str = typer.Option(None, help="Folder with manifest.json (default: data/synth/out)")):
     """Register docs from the source DB, digitize with Docling, build sections, enrich."""
     from .service import ingest_all
-    res = ingest_all(enrich=not no_enrich, force=force, doc_ids=doc or None)
+    res = ingest_all(enrich=not no_enrich, force=force, doc_ids=doc or None, source_dir=source)
     t = Table("doc", "sections", "qc flags", "enrichment")
     for r in res:
         t.add_row(r["doc_id"], str(r.get("sections", r.get("skipped", ""))), ",".join(r.get("qc_flags", []) or []),

@@ -1,0 +1,544 @@
+[
+  {
+    "doc": "L1-001",
+    "new": {
+      "gold": 278,
+      "built": 278,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "parent_acc": 1.0,
+      "missing": [],
+      "extra": []
+    },
+    "legacy": {
+      "gold": 278,
+      "built": 53,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "parent_acc": 0.0,
+      "missing": [
+        "L1-001:s1.1",
+        "L1-001:s1.2",
+        "L1-001:s1.2.a",
+        "L1-001:s1.2.b",
+        "L1-001:s1.2.c",
+        "L1-001:s1.3"
+      ],
+      "extra": [
+        "L1-001:x1",
+        "L1-001:x10",
+        "L1-001:x11",
+        "L1-001:x12",
+        "L1-001:x13",
+        "L1-001:x14"
+      ]
+    },
+    "styles": {
+      "recitals": 1,
+      "article": 18,
+      "decimal": 132,
+      "alpha_lower": 107,
+      "roman_lower": 16,
+      "part": 3,
+      "signature": 1
+    },
+    "toc_pages": [
+      2
+    ],
+    "sequence_issues": 0,
+    "dropped": 2
+  },
+  {
+    "doc": "L1-002",
+    "new": {
+      "gold": 10,
+      "built": 10,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "parent_acc": 1.0,
+      "missing": [],
+      "extra": []
+    },
+    "legacy": {
+      "gold": 10,
+      "built": 4,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "parent_acc": 0.0,
+      "missing": [
+        "L1-002:s1.1",
+        "L1-002:s2.1",
+        "L1-002:s2.2",
+        "L1-002:s2.3",
+        "L1-002:s2.4",
+        "L1-002:s2.5"
+      ],
+      "extra": [
+        "L1-002:x1",
+        "L1-002:x2",
+        "L1-002:x3",
+        "L1-002:x4"
+      ]
+    },
+    "styles": {
+      "recitals": 1,
+      "article": 2,
+      "decimal": 6,
+      "signature": 1
+    },
+    "toc_pages": [],
+    "sequence_issues": 0,
+    "dropped": 0
+  },
+  {
+    "doc": "L1-003",
+    "new": {
+      "gold": 18,
+      "built": 18,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "parent_acc": 1.0,
+      "missing": [],
+      "extra": []
+    },
+    "legacy": {
+      "gold": 18,
+      "built": 4,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "parent_acc": 0.0,
+      "missing": [
+        "L1-003:s1.1",
+        "L1-003:s2.1",
+        "L1-003:s2.10",
+        "L1-003:s2.11",
+        "L1-003:s2.12",
+        "L1-003:s2.13"
+      ],
+      "extra": [
+        "L1-003:x1",
+        "L1-003:x2",
+        "L1-003:x3",
+        "L1-003:x4"
+      ]
+    },
+    "styles": {
+      "recitals": 1,
+      "article": 2,
+      "decimal": 14,
+      "signature": 1
+    },
+    "toc_pages": [],
+    "sequence_issues": 0,
+    "dropped": 0
+  },
+  {
+    "doc": "L1-004",
+    "new": {
+      "gold": 12,
+      "built": 12,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "parent_acc": 1.0,
+      "missing": [],
+      "extra": []
+    },
+    "legacy": {
+      "gold": 12,
+      "built": 4,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "parent_acc": 0.0,
+      "missing": [
+        "L1-004:s1.1",
+        "L1-004:s2.1",
+        "L1-004:s2.2",
+        "L1-004:s2.3",
+        "L1-004:s2.4",
+        "L1-004:s2.5"
+      ],
+      "extra": [
+        "L1-004:x1",
+        "L1-004:x2",
+        "L1-004:x3",
+        "L1-004:x4"
+      ]
+    },
+    "styles": {
+      "recitals": 1,
+      "article": 2,
+      "decimal": 8,
+      "signature": 1
+    },
+    "toc_pages": [],
+    "sequence_issues": 0,
+    "dropped": 1
+  },
+  {
+    "doc": "L1-005",
+    "new": {
+      "gold": 12,
+      "built": 12,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "parent_acc": 1.0,
+      "missing": [],
+      "extra": []
+    },
+    "legacy": {
+      "gold": 12,
+      "built": 4,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "parent_acc": 0.0,
+      "missing": [
+        "L1-005:s1.1",
+        "L1-005:s2.1",
+        "L1-005:s2.2",
+        "L1-005:s2.3",
+        "L1-005:s2.4",
+        "L1-005:s2.5"
+      ],
+      "extra": [
+        "L1-005:x1",
+        "L1-005:x2",
+        "L1-005:x3",
+        "L1-005:x4"
+      ]
+    },
+    "styles": {
+      "recitals": 1,
+      "article": 2,
+      "decimal": 8,
+      "signature": 1
+    },
+    "toc_pages": [],
+    "sequence_issues": 0,
+    "dropped": 0
+  },
+  {
+    "doc": "L1-006",
+    "new": {
+      "gold": 18,
+      "built": 18,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "parent_acc": 1.0,
+      "missing": [],
+      "extra": []
+    },
+    "legacy": {
+      "gold": 18,
+      "built": 4,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "parent_acc": 0.0,
+      "missing": [
+        "L1-006:s1.1",
+        "L1-006:s2.1",
+        "L1-006:s2.10",
+        "L1-006:s2.11",
+        "L1-006:s2.12",
+        "L1-006:s2.13"
+      ],
+      "extra": [
+        "L1-006:x1",
+        "L1-006:x2",
+        "L1-006:x3",
+        "L1-006:x4"
+      ]
+    },
+    "styles": {
+      "recitals": 1,
+      "article": 2,
+      "decimal": 14,
+      "signature": 1
+    },
+    "toc_pages": [],
+    "sequence_issues": 0,
+    "dropped": 0
+  },
+  {
+    "doc": "L2-001",
+    "new": {
+      "gold": 294,
+      "built": 294,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "parent_acc": 1.0,
+      "missing": [],
+      "extra": []
+    },
+    "legacy": {
+      "gold": 294,
+      "built": 65,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "parent_acc": 0.0,
+      "missing": [
+        "L2-001:s1.1",
+        "L2-001:s1.2",
+        "L2-001:s1.3",
+        "L2-001:s1.4",
+        "L2-001:s1.5",
+        "L2-001:s1.5.a"
+      ],
+      "extra": [
+        "L2-001:x1",
+        "L2-001:x10",
+        "L2-001:x11",
+        "L2-001:x12",
+        "L2-001:x13",
+        "L2-001:x14"
+      ]
+    },
+    "styles": {
+      "recitals": 1,
+      "article": 18,
+      "decimal": 130,
+      "alpha_lower": 125,
+      "roman_lower": 16,
+      "part": 3,
+      "signature": 1
+    },
+    "toc_pages": [
+      2
+    ],
+    "sequence_issues": 0,
+    "dropped": 2
+  },
+  {
+    "doc": "L2-002",
+    "new": {
+      "gold": 14,
+      "built": 14,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "parent_acc": 1.0,
+      "missing": [],
+      "extra": []
+    },
+    "legacy": {
+      "gold": 14,
+      "built": 4,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "parent_acc": 0.0,
+      "missing": [
+        "L2-002:s1.1",
+        "L2-002:s2.1",
+        "L2-002:s2.2",
+        "L2-002:s2.3",
+        "L2-002:s2.4",
+        "L2-002:s2.5"
+      ],
+      "extra": [
+        "L2-002:x1",
+        "L2-002:x2",
+        "L2-002:x3",
+        "L2-002:x4"
+      ]
+    },
+    "styles": {
+      "recitals": 1,
+      "article": 2,
+      "decimal": 10,
+      "signature": 1
+    },
+    "toc_pages": [],
+    "sequence_issues": 0,
+    "dropped": 0
+  },
+  {
+    "doc": "L2-003",
+    "new": {
+      "gold": 8,
+      "built": 8,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "parent_acc": 1.0,
+      "missing": [],
+      "extra": []
+    },
+    "legacy": {
+      "gold": 8,
+      "built": 4,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "parent_acc": 0.0,
+      "missing": [
+        "L2-003:s1.1",
+        "L2-003:s2.1",
+        "L2-003:s2.2",
+        "L2-003:s2.3",
+        "L2-003:sart1",
+        "L2-003:sart2"
+      ],
+      "extra": [
+        "L2-003:x1",
+        "L2-003:x2",
+        "L2-003:x3",
+        "L2-003:x4"
+      ]
+    },
+    "styles": {
+      "recitals": 1,
+      "article": 2,
+      "decimal": 4,
+      "signature": 1
+    },
+    "toc_pages": [],
+    "sequence_issues": 0,
+    "dropped": 0
+  },
+  {
+    "doc": "L2-004",
+    "new": {
+      "gold": 8,
+      "built": 8,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "parent_acc": 1.0,
+      "missing": [],
+      "extra": []
+    },
+    "legacy": {
+      "gold": 8,
+      "built": 4,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "parent_acc": 0.0,
+      "missing": [
+        "L2-004:s1.1",
+        "L2-004:s2.1",
+        "L2-004:s2.2",
+        "L2-004:s2.3",
+        "L2-004:sart1",
+        "L2-004:sart2"
+      ],
+      "extra": [
+        "L2-004:x1",
+        "L2-004:x2",
+        "L2-004:x3",
+        "L2-004:x4"
+      ]
+    },
+    "styles": {
+      "recitals": 1,
+      "article": 2,
+      "decimal": 4,
+      "signature": 1
+    },
+    "toc_pages": [],
+    "sequence_issues": 0,
+    "dropped": 1
+  },
+  {
+    "doc": "L2-005",
+    "new": {
+      "gold": 14,
+      "built": 14,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "parent_acc": 1.0,
+      "missing": [],
+      "extra": []
+    },
+    "legacy": {
+      "gold": 14,
+      "built": 4,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "parent_acc": 0.0,
+      "missing": [
+        "L2-005:s1.1",
+        "L2-005:s2.1",
+        "L2-005:s2.2",
+        "L2-005:s2.3",
+        "L2-005:s2.4",
+        "L2-005:s2.5"
+      ],
+      "extra": [
+        "L2-005:x1",
+        "L2-005:x2",
+        "L2-005:x3",
+        "L2-005:x4"
+      ]
+    },
+    "styles": {
+      "recitals": 1,
+      "article": 2,
+      "decimal": 10,
+      "signature": 1
+    },
+    "toc_pages": [],
+    "sequence_issues": 0,
+    "dropped": 0
+  },
+  {
+    "doc": "L2-006",
+    "new": {
+      "gold": 14,
+      "built": 14,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "parent_acc": 1.0,
+      "missing": [],
+      "extra": []
+    },
+    "legacy": {
+      "gold": 14,
+      "built": 4,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "parent_acc": 0.0,
+      "missing": [
+        "L2-006:s1.1",
+        "L2-006:s2.1",
+        "L2-006:s2.2",
+        "L2-006:s2.3",
+        "L2-006:s2.4",
+        "L2-006:s2.5"
+      ],
+      "extra": [
+        "L2-006:x1",
+        "L2-006:x2",
+        "L2-006:x3",
+        "L2-006:x4"
+      ]
+    },
+    "styles": {
+      "recitals": 1,
+      "article": 2,
+      "decimal": 10,
+      "signature": 1
+    },
+    "toc_pages": [],
+    "sequence_issues": 0,
+    "dropped": 0
+  }
+]

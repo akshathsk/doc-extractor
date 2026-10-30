@@ -1,0 +1,128 @@
+[
+  {
+    "id": "L2-005:srecitals",
+    "style": "recitals",
+    "label": "RECITALS",
+    "number": "recitals",
+    "heading": "Recitals",
+    "parent": null,
+    "level": 1
+  },
+  {
+    "id": "L2-005:sart1",
+    "style": "article",
+    "label": "ARTICLE I",
+    "number": "art1",
+    "heading": "AMENDMENTS",
+    "parent": null,
+    "level": 1
+  },
+  {
+    "id": "L2-005:s1.1",
+    "style": "section",
+    "label": "Section 1.01",
+    "number": "1.1",
+    "heading": "Payout",
+    "parent": "L2-005:sart1",
+    "level": 2
+  },
+  {
+    "id": "L2-005:sart2",
+    "style": "article",
+    "label": "ARTICLE II",
+    "number": "art2",
+    "heading": "GENERAL",
+    "parent": null,
+    "level": 1
+  },
+  {
+    "id": "L2-005:s2.1",
+    "style": "section",
+    "label": "Section 2.01",
+    "number": "2.1",
+    "heading": "Remedies",
+    "parent": "L2-005:sart2",
+    "level": 2
+  },
+  {
+    "id": "L2-005:s2.2",
+    "style": "section",
+    "label": "Section 2.02",
+    "number": "2.2",
+    "heading": "Scope",
+    "parent": "L2-005:sart2",
+    "level": 2
+  },
+  {
+    "id": "L2-005:s2.3",
+    "style": "section",
+    "label": "Section 2.03",
+    "number": "2.3",
+    "heading": "Survival",
+    "parent": "L2-005:sart2",
+    "level": 2
+  },
+  {
+    "id": "L2-005:s2.4",
+    "style": "section",
+    "label": "Section 2.04",
+    "number": "2.4",
+    "heading": "Reporting",
+    "parent": "L2-005:sart2",
+    "level": 2
+  },
+  {
+    "id": "L2-005:s2.5",
+    "style": "section",
+    "label": "Section 2.05",
+    "number": "2.5",
+    "heading": "Cooperation",
+    "parent": "L2-005:sart2",
+    "level": 2
+  },
+  {
+    "id": "L2-005:s2.6",
+    "style": "section",
+    "label": "Section 2.06",
+    "number": "2.6",
+    "heading": "Obligations",
+    "parent": "L2-005:sart2",
+    "level": 2
+  },
+  {
+    "id": "L2-005:s2.7",
+    "style": "section",
+    "label": "Section 2.07",
+    "number": "2.7",
+    "heading": "Obligations",
+    "parent": "L2-005:sart2",
+    "level": 2
+  },
+  {
+    "id": "L2-005:s2.8",
+    "style": "section",
+    "label": "Section 2.08",
+    "number": "2.8",
+    "heading": "Survival",
+    "parent": "L2-005:sart2",
+    "level": 2
+  },
+  {
+    "id": "L2-005:s2.9",
+    "style": "section",
+    "label": "Section 2.09",
+    "number": "2.9",
+    "heading": "Obligations",
+    "parent": "L2-005:sart2",
+    "level": 2
+  },
+  {
+    "id": "L2-005:ssignature",
+    "style": "signature",
+    "label": "SIGNATURES",
+    "number": "signature",
+    "heading": "Signature Page",
+    "parent": null,
+    "level": 1
+  }
+]

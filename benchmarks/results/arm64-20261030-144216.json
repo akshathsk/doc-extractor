@@ -1,0 +1,113 @@
+{
+  "machine": "arm64 arm macOS-15.6.1-arm64-arm-64bit",
+  "python": "3.12.8",
+  "at": "2026-10-30T14:42:16",
+  "doc": "L1-001.pdf",
+  "pages": 202,
+  "cases": [
+    {
+      "case": "digital body, OCR off",
+      "doc": "L1-001.pdf",
+      "range": "21-34",
+      "pages": 14,
+      "init_s": 9.93,
+      "convert_s": 5.03,
+      "s_per_page": 0.359,
+      "status": "success",
+      "texts": 134,
+      "tables": 0,
+      "peak_rss_mb": 942
+    },
+    {
+      "case": "digital body, OCR on",
+      "doc": "L1-001.pdf",
+      "range": "21-34",
+      "pages": 14,
+      "init_s": 7.08,
+      "convert_s": 3.43,
+      "s_per_page": 0.245,
+      "status": "success",
+      "texts": 134,
+      "tables": 0,
+      "peak_rss_mb": 1185
+    },
+    {
+      "case": "table pages, accurate",
+      "doc": "L1-001.pdf",
+      "range": "199-200",
+      "pages": 2,
+      "init_s": 6.54,
+      "convert_s": 2.07,
+      "s_per_page": 1.034,
+      "status": "success",
+      "texts": 8,
+      "tables": 2,
+      "peak_rss_mb": 1082
+    },
+    {
+      "case": "table pages, fast",
+      "doc": "L1-001.pdf",
+      "range": "199-200",
+      "pages": 2,
+      "init_s": 6.14,
+      "convert_s": 1.48,
+      "s_per_page": 0.741,
+      "status": "success",
+      "texts": 8,
+      "tables": 2,
+      "peak_rss_mb": 910
+    },
+    {
+      "case": "scanned page, OCR on",
+      "doc": "L1-001.pdf",
+      "range": "202-202",
+      "pages": 1,
+      "init_s": 6.36,
+      "convert_s": 1.91,
+      "s_per_page": 1.908,
+      "status": "success",
+      "texts": 4,
+      "tables": 0,
+      "peak_rss_mb": 951
+    },
+    {
+      "case": "fully scanned doc (L1-003.pdf), OCR on",
+      "doc": "L1-003.pdf",
+      "range": "1-8",
+      "pages": 8,
+      "init_s": 5.79,
+      "convert_s": 9.53,
+      "s_per_page": 1.191,
+      "status": "success",
+      "texts": 65,
+      "tables": 0,
+      "peak_rss_mb": 1010
+    },
+    {
+      "case": "WHOLE FILE, OCR off",
+      "doc": "L1-001.pdf",
+      "range": "1-202",
+      "pages": 202,
+      "init_s": 6.64,
+      "convert_s": 42.25,
+      "s_per_page": 0.209,
+      "status": "success",
+      "texts": 1940,
+      "tables": 3,
+      "peak_rss_mb": 1961
+    },
+    {
+      "case": "WHOLE FILE, OCR on (today's settings)",
+      "doc": "L1-001.pdf",
+      "range": "1-202",
+      "pages": 202,
+      "init_s": 8.76,
+      "convert_s": 40.47,
+      "s_per_page": 0.2,
+      "status": "success",
+      "texts": 1944,
+      "tables": 3,
+      "peak_rss_mb": 2171
+    }
+  ]
+}
