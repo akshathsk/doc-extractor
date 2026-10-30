@@ -2,6 +2,36 @@
 
 Last updated: 2026-10-30 · Live doc: https://claude.ai/artifact/XzkESiWJPKx4NeLcwQ8V2p
 
+## Build status (2026-10-30)
+
+Built and tested **offline** (rule-based agents, no LLM). The live LLM paths are written but not yet re-verified at
+scale because the OpenAI account has no credits; that run is the next step.
+
+| Part | Milestone | Status | Evidence |
+| --- | --- | --- | --- |
+| 1 Docling | M1 benchmark | Done | `benchmarks/docling_bench.py`: 0.2 s/page whole-file, 1-2 GB per process |
+| 1 Docling | M2 probe, shard, merge | Done, **off by default** | `benchmarks/shard_bench.py`: sections identical to whole-file (279/279); retry and split work; but 1.3-2x slower on one machine |
+| 1 Docling | M3 queue and remote workers | Not started | needs the infrastructure decision (Temporal / SQS, machines or GPUs) |
+| 1 Docling | M4 observability | Partial | shard spans in traces, shard table in the Dev Console lifecycle; no throughput dashboard yet |
+| 2 Enrichment | E1 section cache | Done | test: one changed section re-enriches 1 of N |
+| 2 Enrichment | E2 parallel token batches | Done (offline) | 279-section agreement: 30 batches in parallel; completeness retry |
+| 2 Enrichment | E3 two-level reduce | Done (offline) | article summaries; effective date / scope cited and verified |
+| 2 Enrichment | E4 background re-enrichment | Partial | one-transaction switch done; job queue, triggers and budget not built |
+| 2 Enrichment | E5 feedback loop | Not started | |
+| 3 Research | R1 two-level outline | Done | article outline ~2k tokens for a 200-page agreement |
+| 3 Research | R2 router + Doc Readers | Done (offline) | Doc Reader context ≤ ~3.5k tokens (was ~750k projected); small-set eval unchanged (all 1.0) |
+| 3 Research | R3 coverage check | Partial | built (one re-queue round); no dedicated gap test yet |
+| 3 Research | R4 hybrid search | Done (synthetic) | recall@1 hybrid 0.92 vs BM25 0.85 / semantic 0.77; needs real contracts |
+| 3 Research | R5 model tiering | Not started | |
+| 4 Quotes | Q1-Q3 text store, verify, multi-box | Done | tests prove no Docling JSON is read; cross-page quote gets both pages' boxes |
+| 5 Structure | S1-S3 grammar, stack, cleanup | Done | `evals/structure_eval.py`: section F1 1.0, parent accuracy 1.0 on the large set |
+| 5 Structure | S4 attachments + layout fallback | Partial | schedule/exhibit namespaces done; Word auto-numbering and font/indent fallback not built |
+| 5 Structure | S5 LLM repair + Dev Console | Partial | decisions shown in the Dev Console; heading-only LLM repair not built |
+
+Offline extraction on the large set reads the right section for every gold value; it misses reworded clauses only
+because the offline rules cannot parse them (that is the LLM's job). Synthetic data was written by the same author as
+the parsers, so all synthetic scores are optimistic until checked on real, redacted contracts.
+
 ## Goal and scale target
 
 The system must handle **30 documents per trader, each up to 200 pages: up to 6,000 pages per trader**, without changing what the agents see. This plan tackles the bottlenecks one at a time; Part 1 is Docling conversion, because every later step waits on it.

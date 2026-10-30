@@ -124,6 +124,15 @@ def render_lifecycle() -> None:
         c[3].metric("Text items", len(ddoc.texts))
         c[4].metric("Tables", len(ddoc.tables))
         b.markdown("**Settings used:** " + ", ".join(f"`{k}={v}`" for k, v in pipeline_options().items()))
+        sh = qc.get("sharding")
+        if sh:
+            b.markdown(f"**Sharded conversion:** {len(sh['shards'])} shards of up to {sh['shard_pages']} pages on {sh['workers']} workers · "
+                       f"{sh['pages_converted']}/{sh['pages']} pages · {sh['scanned_pages']} scanned · status `{sh['status']}`"
+                       + (f" · failed pages {sh['failed_pages']}" if sh["failed_pages"] else ""))
+            b.dataframe(pd.DataFrame([{k: s.get(k) for k in ("start", "end", "scanned", "status", "attempts", "seconds", "worker", "error")}
+                                      for s in sh["shards"]]), hide_index=True, use_container_width=True)
+        else:
+            b.caption("Converted as one whole file (sharding is used only when workers run on separate machines; see the scaling plan).")
         labels = Counter(t.label.value for t in ddoc.texts)
         b.markdown("**Items by label:** " + ", ".join(f"`{k}` ×{v}" for k, v in labels.most_common()))
         rows = []
@@ -229,7 +238,19 @@ def render_lifecycle() -> None:
     if not enr:
         b.warning("Not enriched yet.")
     else:
-        llm = q1("SELECT * FROM spans WHERE kind='llm' AND name=? ORDER BY started_at DESC LIMIT 1", (f"digitizer:{did}",))
+        llm = q1("SELECT * FROM spans WHERE kind='llm' AND (name=? OR name LIKE ?) ORDER BY started_at DESC LIMIT 1",
+                 (f"digitizer:{did}", f"digitizer:{did}:%"))
+        mp = q1("SELECT output_json FROM spans WHERE name=? ORDER BY started_at DESC LIMIT 1", (f"enrich-map:{did}",))
+        ar = q1("SELECT output_json FROM spans WHERE name=? ORDER BY started_at DESC LIMIT 1", (f"enrich-articles:{did}",))
+        if mp:
+            m, a = jl(mp["output_json"]) or {}, (jl(ar["output_json"]) if ar else None) or {}
+            b.markdown(f"**Map:** {m.get('batches')} batch(es) in parallel · {m.get('enriched')} sections enriched · "
+                       f"{m.get('reused')} reused from the section cache · {m.get('retried_sections')} retried · {m.get('signals')} document signals  \n"
+                       f"**Reduce:** {a.get('articles', 0)} article summaries ({a.get('reused', 0)} reused) → one document-level call")
+            arts = q("SELECT section_id, summary FROM article_enrichment WHERE doc_id=?", (did,))
+            if arts:
+                with b.expander(f"Article summaries ({len(arts)})"):
+                    st.dataframe(pd.DataFrame(arts), hide_index=True, use_container_width=True)
         c = b.columns(5)
         c[0].metric("Model", enr["model"])
         c[1].metric("Prompt", enr["prompt_version"])
@@ -277,8 +298,14 @@ def render_lifecycle() -> None:
 
     # 9 ------------------------------------------------------------------------------------------------
     from compdoc.tools.search import tokenize
-    b = step(9, "Search index", "Each section is added to the BM25 keyword index as: heading path + text + tables + LLM summary. "
-             "The index rebuilds itself automatically when sections or summaries change.", "in memory (rebuilt from the `sections` table)")
+    b = step(9, "Search index", "Each section is added to the BM25 keyword index (heading path + text + tables + LLM summary) and "
+             "embedded with a local model for semantic search; both feed the hybrid search that builds Doc Reader shortlists.",
+             "BM25 in memory; vectors in `section_vectors` (keyed by section hash + model)")
+    try:
+        nv = q("SELECT count(*) n FROM section_vectors v JOIN section_text t ON t.section_hash=v.section_hash WHERE t.doc_id=?", (did,))[0]["n"]
+        b.caption(f"{nv} embedding chunks stored for this document.")
+    except Exception:  # noqa: BLE001 - table appears after the first embedding run
+        pass
     if secs:
         b.dataframe(pd.DataFrame([{"section": s["section_id"],
                                    "indexed text": (" ".join(jl(s["path_json"]) or []) + " | " + s["text"][:120] + " | " + (s["summary"] or "")[:80]),

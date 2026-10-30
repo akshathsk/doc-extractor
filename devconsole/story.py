@@ -86,7 +86,7 @@ def groups(run_id: str) -> list[dict]:
         if s["span_id"] != oid:
             g["steps"].append(s)
     # drop pure wrapper nodes whose only content is an agent (e.g. node "researcher")
-    return sorted([g for g in out.values() if not (g["head"]["kind"] == "node" and g["head"]["name"] == "researcher")],
+    return sorted([g for g in out.values() if not (g["head"]["kind"] == "node" and g["head"]["name"] in ("researcher", "doc_reader"))],
                   key=lambda g: g["head"]["started_at"])
 
 
@@ -173,6 +173,25 @@ def render_tool_response(name: str, args: dict, out, key: str) -> None:
             st.dataframe(pd.DataFrame([{"#": c["n"], "doc": c["doc_id"], "section": c["section"], "page": c.get("page"),
                                         "docling item": c.get("docling_ref"), "quote": c.get("quote")} for c in out]),
                          hide_index=True, use_container_width=True)
+        elif name == "route_work_items" and isinstance(out, list):
+            st.caption(f"{len(out)} work item(s): one Doc Reader each")
+            st.dataframe(pd.DataFrame([{"document": w["doc_id"], "terms": ", ".join(w["terms"]), "shortlist": w["shortlist"],
+                                        "evidence": ", ".join(f"{k}: {v}" for k, v in w["evidence"].items())} for w in out]),
+                         hide_index=True, use_container_width=True)
+        elif name == "coverage_check" and isinstance(out, list):
+            if out:
+                st.warning(f"{len(out)} gap(s) re-queued")
+                st.dataframe(pd.DataFrame(out), hide_index=True, use_container_width=True)
+            else:
+                st.success("No gaps: every strongly-evidenced term was read or has a finding.")
+        elif name == "get_article_sections" and isinstance(out, list):
+            st.dataframe(pd.DataFrame([{"section": ("    " * (s["depth"] - 1)) + f"{s['number'] or ''} {s['heading']}",
+                                        "tags": ", ".join(s["term_tags"]), "summary": s["summary"]} for s in out]),
+                         hide_index=True, use_container_width=True)
+        elif name == "search_in_doc" and isinstance(out, list):
+            st.dataframe(pd.DataFrame([{"section": h.get("section_id"), "heading": h.get("heading"), "found_by": ", ".join(h.get("found_by", [])),
+                                        "semantic": h.get("semantic_score"), "snippet": h.get("snippet")} for h in out]),
+                         hide_index=True, use_container_width=True)
         elif name == "reconcile" and isinstance(out, dict):
             st.markdown(f"{out.get('leaves')} values reconciled · conflicts: {out.get('conflicts') or 'none'}")
         else:
@@ -195,6 +214,9 @@ def sections_table(steps: list[dict], cited: set[str]) -> pd.DataFrame | None:
         if n in ("search_sections", "find_sections_by_term") and isinstance(out, list):
             for h in out:
                 found.setdefault(h["section_id"], set()).add(n)
+        elif n == "search_in_doc" and isinstance(out, list):
+            for h in out:
+                found.setdefault(h["section_id"], set()).add("search_in_doc (" + "+".join(h.get("found_by", [])) + ")")
         elif n == "find_docs_with_term" and isinstance(out, dict):
             for h in out.get("results", []):
                 found.setdefault(h["section_id"], set()).add(n)

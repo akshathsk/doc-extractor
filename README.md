@@ -41,9 +41,10 @@ work without an API key.
  (trader_id, doc_date, path)  (layout, TableFormer, OCR)  (clause numbering, heading repair)   (summary, term tags, definitions,
                                                                                                cross refs, scope, effective date)
                        EXTRACTION GRAPH (LangGraph, checkpointed)
- trader_id ─► orchestrator ─► Send × N ─► Term Researcher (one per term, in parallel)
-                                          tools: find_sections_by_term, search_sections, get_section_outline,
-                                                 read_section, record_finding  ──► evidence ledger
+ trader_id ─► orchestrator ─► coverage router (code: tags + keyword + semantic) ─► Send × N ─►
+              Doc Reader (one per document; term groups for long documents; bounded context)
+                 tools: get_article_sections, read_chosen_sections, read_section, search_in_doc, record_finding
+              ─► coverage check (re-queue gaps once) ─► evidence ledger
             ─► reconciler (deterministic `reconcile` + LLM only on conflicts)
             ─► human_review (interrupt) if conflicts remain
             ─► summarizer + publish (versioned extract)
@@ -67,6 +68,15 @@ term. The following are flagged for review, never resolved silently:
 - Tools are bound to the trader and caller, so an agent can't reach another trader's documents.
 - Cross-trader tools withhold clause text from callers who aren't entitled to it.
 - The OpenAI agent loop uses the Responses API with `store=False`, so OpenAI keeps no copy of contract text.
+
+## Scale
+
+See [docs/scaling-plan.md](docs/scaling-plan.md) for the plan and build status: real-contract section builder
+(Articles, `Section 4.02`, `(a)(i)`, schedules), section text store for quote checks, enrichment map-reduce with a
+per-section cache, Doc Readers with two-level outlines and hybrid search (local embeddings), and an optional sharded
+Docling path. Large synthetic contracts: `uv run python data/synth/generate_large.py` then
+`uv run compdoc ingest --source data/synth/out_large`. Evals: `evals/structure_eval.py`, `evals/retrieval_eval.py`,
+`evals/run_evals.py`; benchmarks in `benchmarks/`.
 
 ## Layout
 
