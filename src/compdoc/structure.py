@@ -455,11 +455,17 @@ def build_sections(doc_id: str, doc: DoclingDocument) -> tuple[list[Section], di
             sec.bboxes += bx
             sec.item_refs.append(n.head_item.self_ref)
         texts = []
+        offset = 0
         for kind, payload, item in n.items:
             if kind == "table":
                 sec.tables_md.append(payload)
             else:
                 texts.append(payload)
+                for p in (getattr(item, "prov", None) or [None]):
+                    box = {"page": p.page_no, "l": p.bbox.l, "t": p.bbox.t, "r": p.bbox.r, "b": p.bbox.b,
+                           "origin": getattr(p.bbox.coord_origin, "value", str(p.bbox.coord_origin))} if p else {}
+                    sec.spans.append({"start": offset, "end": offset + len(payload), "ref": item.self_ref, **box})
+                offset += len(payload) + 1  # "\n" joiner
             if item is not n.head_item:
                 pg, bx = _prov(item)
                 sec.pages += pg

@@ -38,6 +38,13 @@ CREATE TABLE IF NOT EXISTS sections (
   summary TEXT, term_tags_json TEXT, defined_terms_json TEXT, cross_refs_json TEXT, scope_notes_json TEXT);
 CREATE INDEX IF NOT EXISTS ix_sections_doc ON sections(doc_id);
 
+CREATE TABLE IF NOT EXISTS section_text (
+  section_id TEXT PRIMARY KEY, doc_id TEXT, section_hash TEXT, norm_text TEXT);
+CREATE INDEX IF NOT EXISTS ix_section_text_doc ON section_text(doc_id);
+CREATE TABLE IF NOT EXISTS section_spans (
+  section_id TEXT, start INTEGER, "end" INTEGER, item_ref TEXT, page INTEGER, l REAL, t REAL, r REAL, b REAL, origin TEXT);
+CREATE INDEX IF NOT EXISTS ix_section_spans ON section_spans(section_id);
+
 CREATE TABLE IF NOT EXISTS doc_enrichment (
   doc_id TEXT PRIMARY KEY, doc_summary TEXT, terms_covered_json TEXT, effective_date_in_text TEXT,
   doc_scope_note TEXT, model TEXT, prompt_version TEXT, enriched_at TEXT);

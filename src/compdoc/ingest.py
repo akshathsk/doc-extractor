@@ -287,6 +287,16 @@ def store_sections(doc_id: str, sections: list[Section]) -> None:
                  j(s.tables_md), j(s.item_refs), j(s.bboxes),
                  o["summary"] if o else None, o["term_tags_json"] if o else None, o["defined_terms_json"] if o else None,
                  o["cross_refs_json"] if o else None, o["scope_notes_json"] if o else None))
+        # Part 4: text store + position map, so quote checks never read Docling JSON at run time
+        from .tools.verify import norm
+        c.execute("DELETE FROM section_spans WHERE section_id IN (SELECT section_id FROM section_text WHERE doc_id=?)", (doc_id,))
+        c.execute("DELETE FROM section_text WHERE doc_id=?", (doc_id,))
+        for s in sections:
+            c.execute("INSERT INTO section_text(section_id, doc_id, section_hash, norm_text) VALUES (?,?,?,?)",
+                      (s.section_id, doc_id, s.content_hash(), norm(s.text + " " + " ".join(s.tables_md))))
+            c.executemany('INSERT INTO section_spans(section_id, start, "end", item_ref, page, l, t, r, b, origin) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                          [(s.section_id, sp["start"], sp["end"], sp["ref"], sp.get("page"), sp.get("l"), sp.get("t"), sp.get("r"),
+                            sp.get("b"), sp.get("origin")) for sp in s.spans])
 
 
 def ingest_document(doc_id: str, enrich: bool = True, force: bool = False) -> dict:

@@ -115,23 +115,31 @@ with tab_chat:
                "(\"Which docs have a clawback clause?\") or request a draft (\"Draft an amendment for T-1003 raising payout to 18%\").")
     hist = st.session_state.setdefault("chat", [])
 
-    def page_snippet(c: dict):
-        """Crop of the PDF page around the quoted Docling item, outlined in red."""
+    def page_snippets(c: dict) -> list:
+        """One crop per page the quote touches, each Docling box outlined in red (a quote can cross a page break)."""
         doc = q("SELECT path FROM documents WHERE doc_id=?", (c["doc_id"],))
-        b = c.get("bbox")
-        if not doc or not b or not doc[0]["path"].endswith(".pdf") or b.get("l") is None:
-            return None
+        boxes = [b for b in (c.get("boxes") or [c.get("bbox")]) if b and b.get("l") is not None]
+        if not doc or not boxes or not doc[0]["path"].endswith(".pdf"):
+            return []
         import pypdfium2 as pdfium
         from PIL import ImageDraw
         pdf = pdfium.PdfDocument(doc[0]["path"])
-        page = pdf[(b.get("page") or c["page"] or 1) - 1]
-        scale, H = 2.0, page.get_height()
-        img = page.render(scale=scale).to_pil().convert("RGB")
+        out = []
+        for pg in sorted({b.get("page") or c["page"] or 1 for b in boxes}):
+            page = pdf[pg - 1]
+            scale, H = 2.0, page.get_height()
+            img = page.render(scale=scale).to_pil().convert("RGB")
+            drw = ImageDraw.Draw(img)
+            tops, bots = [], []
+            for b in [b for b in boxes if (b.get("page") or 1) == pg]:
+                top, bot = ((H - b["t"]) * scale, (H - b["b"]) * scale) if "BOTTOM" in str(b.get("origin", "")).upper() else (b["t"] * scale, b["b"] * scale)
+                top, bot = min(top, bot), max(top, bot)
+                drw.rectangle([b["l"] * scale - 4, top - 4, b["r"] * scale + 4, bot + 4], outline=(220, 30, 30), width=4)
+                tops.append(top)
+                bots.append(bot)
+            out.append((pg, img.crop((0, max(0, min(tops) - 120), img.width, min(img.height, max(bots) + 120)))))
         pdf.close()
-        top, bot = ((H - b["t"]) * scale, (H - b["b"]) * scale) if "BOTTOM" in str(b.get("origin", "")).upper() else (b["t"] * scale, b["b"] * scale)
-        top, bot = min(top, bot), max(top, bot)
-        ImageDraw.Draw(img).rectangle([b["l"] * scale - 4, top - 4, b["r"] * scale + 4, bot + 4], outline=(220, 30, 30), width=4)
-        return img.crop((0, max(0, top - 120), img.width, min(img.height, bot + 120)))
+        return out
 
     def render_citations(cites: list[dict], key: str) -> None:
         if not cites:
@@ -144,10 +152,9 @@ with tab_chat:
                 if c.get("quote"):
                     st.markdown(f"> {c['quote']}")
                 st.caption(f"Docling item `{c.get('docling_ref') or '-'}` · section `{c['section_id']}` · found via {c['via']}")
-                if c.get("bbox") and st.checkbox("Show on page", key=f"{key}-{c['n']}"):
-                    img = page_snippet(c)
-                    if img is not None:
-                        st.image(img, caption=f"{c['doc_id']} page {c['page']} · Docling bbox")
+                if (c.get("boxes") or c.get("bbox")) and st.checkbox("Show on page", key=f"{key}-{c['n']}"):
+                    for pg, img in page_snippets(c):
+                        st.image(img, caption=f"{c['doc_id']} page {pg} · Docling bbox")
 
     for i, m in enumerate(hist):
         with st.chat_message(m["role"]):

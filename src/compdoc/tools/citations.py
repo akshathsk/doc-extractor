@@ -16,15 +16,17 @@ from .verify import locate_quote
 
 
 def _cand(doc_id: str | None, section_id: str | None, quote: str | None = None, page: int | None = None,
-          docling_ref: str | None = None, bbox: dict | None = None, via: str = "") -> dict | None:
+          docling_ref: str | None = None, bbox: dict | None = None, via: str = "", boxes: list | None = None) -> dict | None:
     if not doc_id or not section_id:
         return None
-    return {"doc_id": doc_id, "section_id": section_id, "quote": quote, "page": page, "docling_ref": docling_ref, "bbox": bbox, "via": via}
+    return {"doc_id": doc_id, "section_id": section_id, "quote": quote, "page": page, "docling_ref": docling_ref, "bbox": bbox,
+            "boxes": boxes, "via": via}
 
 
 def _from_leaf(lf: dict, via: str) -> dict | None:
     s = lf.get("source") or {}
-    return _cand(s.get("doc_id"), s.get("section_id"), s.get("quote"), s.get("page"), s.get("docling_ref"), s.get("bbox"), via)
+    return _cand(s.get("doc_id"), s.get("section_id"), s.get("quote"), s.get("page"), s.get("docling_ref"), s.get("bbox"), via,
+                 s.get("boxes"))
 
 
 def candidates_from_calls(calls: list[dict]) -> list[dict]:
@@ -104,7 +106,9 @@ def build_citations(answer: str, calls: list[dict], caller: str = "system", limi
             "section": f"{sec['number'] or ''} {sec['heading']}".strip(),
             "page": c.get("page") or loc.get("page") or (pages[0] if pages else None),
             "quote": quote, "docling_ref": c.get("docling_ref") or loc.get("docling_ref"),
-            "bbox": c.get("bbox") or loc.get("bbox"), "format": sec["format"], "via": c["via"],
+            "bbox": c.get("bbox") or loc.get("bbox"), "boxes": c.get("boxes") or loc.get("boxes") or
+            ([c.get("bbox") or loc.get("bbox")] if (c.get("bbox") or loc.get("bbox")) else []),
+            "format": sec["format"], "via": c["via"],
         })
     return out
 

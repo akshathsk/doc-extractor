@@ -78,7 +78,8 @@ def record_finding(trader_id: str, path: str, value, quote: str, doc_id: str, se
     loc = locate_quote(doc_id, section_id, quote)
     f = Finding(trader_id=trader_id, path=path, value=value, unit=unit, assertion=assertion, scope_note=scope_note,
                 source=Citation(doc_id=doc_id, section_id=section_id, doc_date=doc["doc_date"], effective_date=effective_date,
-                                page=loc.get("page") or page, quote=quote, docling_ref=loc.get("docling_ref"), bbox=loc.get("bbox")),
+                                page=loc.get("page") or page, quote=quote, docling_ref=loc.get("docling_ref"), bbox=loc.get("bbox"),
+                                boxes=loc.get("boxes")),
                 quote_verified=v["verified"], run_id=current_run_id(), agent=agent)
     with tx() as c:
         cur = c.execute("INSERT INTO findings(run_id, trader_id, path, value_json, unit, assertion, scope_note, source_json,"

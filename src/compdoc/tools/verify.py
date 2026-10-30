@@ -1,18 +1,59 @@
-"""verify_quote: the quote must appear in the cited section's Docling-derived text, and contain the value."""
+"""Quote verification and location (scaling plan, Part 4).
+
+verify_quote: the quote must appear in the cited section (or its child clauses) and contain the value.
+locate_quote: which Docling item(s), page(s) and bounding box(es) the quote sits in.
+
+Both read only the text store written at ingest (`sections`, `section_text`, `section_spans`); Docling JSON is
+never opened while agents run. Matching is exact first, then OCR-tolerant (hyphenated line breaks, punctuation).
+"""
 from __future__ import annotations
 
 import json
 import re
-from functools import lru_cache
-from pathlib import Path
 
-from ..db import q1
+from ..db import q, q1
+
+_QUOTES = str.maketrans({"’": "'", "‘": "'", "“": '"', "”": '"', "–": "-", "—": "-"})
 
 
 def norm(s: str) -> str:
-    s = s.replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
-    s = s.replace("P&L;", "P&L").replace("&amp;", "&")
+    s = (s or "").translate(_QUOTES).replace("P&L;", "P&L").replace("&amp;", "&")
     return re.sub(r"\s+", " ", s).strip().lower().strip(" .;:")
+
+
+def tolerant(s: str) -> str:
+    """OCR-tolerant form: join words hyphenated across line breaks, drop punctuation, collapse spaces."""
+    s = (s or "").translate(_QUOTES).replace("P&L;", "P&L")
+    s = re.sub(r"(\w)-\s*\n\s*(\w)", r"\1\2", s)
+    s = re.sub(r"[^\w%$]+", " ", s.lower())
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _norm_with_map(raw: str, mode: str) -> tuple[str, list[int]]:
+    """Normalised text plus, for each normalised character, its index in `raw` (so a match maps back to spans)."""
+    raw = (raw or "").translate(_QUOTES)
+    out: list[str] = []
+    idx: list[int] = []
+    prev_space = True
+    i = 0
+    while i < len(raw):
+        ch = raw[i]
+        if mode == "tolerant" and ch == "-" and i + 1 < len(raw) and raw[i + 1] == "\n":
+            i += 2  # hyphen at a line break: join the word
+            continue
+        c = ch.lower()
+        is_space = c.isspace() or (mode == "tolerant" and not (c.isalnum() or c in "%$_"))
+        if is_space:
+            if not prev_space:
+                out.append(" ")
+                idx.append(i)
+            prev_space = True
+        else:
+            out.append(c)
+            idx.append(i)
+            prev_space = False
+        i += 1
+    return "".join(out), idx
 
 
 def _value_forms(value) -> list[str]:
@@ -24,72 +65,65 @@ def _value_forms(value) -> list[str]:
     return [str(value).lower()]
 
 
-def _docling_text(doc_id: str) -> str:
-    r = q1("SELECT c.docling_json_path FROM documents d JOIN conversions c ON c.file_hash=d.file_hash WHERE d.doc_id=?", (doc_id,))
-    if not r or not r["docling_json_path"] or not Path(r["docling_json_path"]).exists():
-        return ""
-    data = json.loads(Path(r["docling_json_path"]).read_text())
-    parts = [t.get("text", "") for t in data.get("texts", [])]
-    for t in data.get("tables", []):
-        for cell in t.get("data", {}).get("table_cells", []):
-            parts.append(cell.get("text", ""))
-    return " ".join(parts)
+def _section_family(section_id: str) -> list[dict]:
+    """The section and its direct child clauses (a quote citing 4.2 may sit in 4.2(a))."""
+    return q("SELECT section_id, text, tables_json FROM sections WHERE section_id=? OR parent_id=? ORDER BY ord", (section_id, section_id))
 
 
 def verify_quote(doc_id: str, section_id: str, quote: str, value=None) -> dict:
-    sec = q1("SELECT text, tables_json FROM sections WHERE section_id=? AND doc_id=?", (section_id, doc_id))
-    if not sec:
+    fam = [r for r in _section_family(section_id)]
+    if not any(r["section_id"] == section_id for r in fam) or not q1("SELECT 1 FROM sections WHERE section_id=? AND doc_id=?",
+                                                                      (section_id, doc_id)):
         return {"verified": False, "reason": f"section {section_id} not in {doc_id}"}
     nq = norm(quote)
     if len(nq) < 8:
         return {"verified": False, "reason": "quote too short"}
-    children = q1("SELECT group_concat(text, ' ') t FROM sections WHERE parent_id=?", (section_id,))
-    sec_text = norm(sec["text"] + " " + " ".join(json.loads(sec["tables_json"])) + " " + ((children or {}).get("t") or ""))
-    in_section = nq in sec_text
-    in_doc = in_section or nq in norm(_docling_text(doc_id))
+    blob = " ".join(r["text"] + " " + " ".join(json.loads(r["tables_json"] or "[]")) for r in fam)
+    match = "exact" if nq in norm(blob) else ("tolerant" if tolerant(quote) and tolerant(quote) in tolerant(blob) else None)
+    found_in: list[str] = []
+    if not match:  # where else in the document? (text store, no Docling JSON)
+        tq = tolerant(quote)
+        for r in q("SELECT section_id, norm_text FROM section_text WHERE doc_id=?", (doc_id,)):
+            if nq in r["norm_text"] or (tq and tq in tolerant(r["norm_text"])):
+                found_in.append(r["section_id"])
     forms = _value_forms(value)
-    value_ok = not forms or any(f.lower() in nq for f in forms)
-    verified = in_section and value_ok
-    reason = "ok" if verified else ("value not in quote" if in_section else
-                                     ("quote found in document but not in cited section" if in_doc else "quote not found"))
-    return {"verified": verified, "in_section": in_section, "in_document": in_doc, "value_in_quote": value_ok, "reason": reason}
-
-
-@lru_cache(maxsize=64)
-def _docling_items(doc_id: str) -> dict:
-    """self_ref -> {text, prov} for the document's cached DoclingDocument."""
-    r = q1("SELECT c.docling_json_path FROM documents d JOIN conversions c ON c.file_hash=d.file_hash WHERE d.doc_id=?", (doc_id,))
-    if not r or not r["docling_json_path"] or not Path(r["docling_json_path"]).exists():
-        return {}
-    data = json.loads(Path(r["docling_json_path"]).read_text())
-    return {t["self_ref"]: {"text": t.get("text", ""), "prov": t.get("prov", [])} for t in data.get("texts", [])}
+    value_ok = not forms or any(f.lower() in nq for f in forms) or any(f.lower() in tolerant(quote) for f in forms)
+    verified = bool(match) and value_ok
+    if verified:
+        reason = "ok" if match == "exact" else "ok (OCR-tolerant match)"
+    elif match:
+        reason = "value not in quote"
+    elif found_in:
+        reason = f"quote found in another section of the document: {', '.join(found_in[:3])}"
+    else:
+        reason = "quote not found"
+    return {"verified": verified, "match": match, "in_section": bool(match), "in_document": bool(match) or bool(found_in),
+            "found_in": found_in[:5], "value_in_quote": value_ok, "reason": reason}
 
 
 def locate_quote(doc_id: str, section_id: str, quote: str) -> dict:
-    """Find the Docling item inside the cited section that contains the quote; return its ref, page and bbox."""
-    sec = q1("SELECT item_refs_json FROM sections WHERE section_id=?", (section_id,))
-    items = _docling_items(doc_id)
-    if not sec or not items:
-        return {}
-    nq = norm(quote)
-    refs = json.loads(sec["item_refs_json"] or "[]")
-    kids = q1("SELECT group_concat(item_refs_json, '|') r FROM sections WHERE parent_id=?", (section_id,))
-    for part in ((kids or {}).get("r") or "").split("|"):
-        refs += json.loads(part) if part else []
-    best = None
-    for ref in refs:
-        it = items.get(ref)
-        if not it:
+    """Docling item(s), page(s) and box(es) covering the quote; several boxes when it crosses items or pages."""
+    for mode in ("exact", "tolerant"):
+        nq = norm(quote) if mode == "exact" else tolerant(quote)
+        if not nq:
             continue
-        nt = norm(it["text"])
-        if nq and (nq in nt or (len(nt) > 20 and nt in nq)):
-            best = (ref, it)
-            break
-    if not best:
-        return {}
-    ref, it = best
-    prov = (it["prov"] or [{}])[0]
-    bb = prov.get("bbox") or {}
-    return {"docling_ref": ref, "page": prov.get("page_no"),
-            "bbox": {"page": prov.get("page_no"), "l": bb.get("l"), "t": bb.get("t"), "r": bb.get("r"), "b": bb.get("b"),
-                     "origin": bb.get("coord_origin")} if bb else None}
+        for r in _section_family(section_id):
+            text, idx = _norm_with_map(r["text"], "exact" if mode == "exact" else "tolerant")
+            pos = text.find(nq)
+            if pos < 0:
+                continue
+            start, end = idx[pos], idx[min(pos + len(nq), len(idx)) - 1] + 1
+            spans = q('SELECT item_ref, page, l, t, r, b, origin, start, "end" FROM section_spans WHERE section_id=? '
+                      'AND start < ? AND "end" > ? ORDER BY start, page', (r["section_id"], end, start))
+            if not spans:
+                return {}
+            boxes, refs = [], []
+            for s in spans:
+                if s["item_ref"] not in refs:
+                    refs.append(s["item_ref"])
+                if s["page"] is not None:
+                    boxes.append({"page": s["page"], "l": s["l"], "t": s["t"], "r": s["r"], "b": s["b"], "origin": s["origin"]})
+            first = boxes[0] if boxes else None
+            return {"docling_ref": refs[0], "refs": refs, "page": first["page"] if first else None, "bbox": first, "boxes": boxes,
+                    "match": mode, "section_id": r["section_id"]}
+    return {}

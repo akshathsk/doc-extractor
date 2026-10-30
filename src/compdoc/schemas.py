@@ -58,6 +58,11 @@ class Section(BaseModel):
     tables_md: list[str] = []
     item_refs: list[str] = []
     bboxes: list[dict] = []  # [{page, l, t, r, b}]
+    spans: list[dict] = []  # character ranges of `text` -> Docling item: [{start, end, ref, page, l, t, r, b, origin}]
+
+    def content_hash(self) -> str:
+        import hashlib
+        return hashlib.sha1(("\u241e".join(self.path) + "\u241f" + self.text + "\u241f" + "\u241f".join(self.tables_md)).encode()).hexdigest()[:20]
 
 
 class SectionEnrichment(BaseModel):
@@ -86,7 +91,8 @@ class Citation(BaseModel):
     page: int | None = None
     quote: str
     docling_ref: str | None = None  # Docling item (e.g. "#/texts/16") the quote was found in
-    bbox: dict | None = None  # {page, l, t, r, b, origin} from Docling provenance
+    bbox: dict | None = None  # {page, l, t, r, b, origin} from Docling provenance (first box)
+    boxes: list[dict] | None = None  # every box the quote covers (several when it crosses items or pages)
 
 
 class Finding(BaseModel):
