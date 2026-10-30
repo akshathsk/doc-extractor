@@ -49,6 +49,18 @@ These timings come from tiny documents. Real 200-page contracts must be benchmar
 | Scanned page / fully scanned 8-page doc (OCR) | 1 / 8 | 1.9 / 1.2 | ~1 GB |
 | Model load per process (warm disk cache) | | 6-10 s | |
 
+**M2 sharding result (`benchmarks/shard_bench.py`, same 202-page PDF, same laptop):**
+
+| Scenario | Seconds | Outcome |
+| --- | --- | --- |
+| Whole file, 1 process | 59 | success |
+| 7 shards, 2 local workers | 77 | success; sections identical to whole file (279/279) |
+| 7 shards, 4 local workers | 126 | success |
+| Transient failure on page 45 | 157 | retried once, success |
+| Page 45 always fails | 213 | shard split down to page 45; 201/202 pages kept; `partial_success` with page 45 flagged |
+
+**Decision:** on a single CPU machine, sharding is slower, because Docling already uses every core in one process and extra local workers compete for CPU and memory. So the default is **one whole document per worker** (`COMPDOC_CONVERT_WORKERS=1`), and the sharded path is switched on when workers run on separate machines or GPUs (M3), where it cuts wall time per document and isolates failures. Paragraphs split at a page or shard break are rejoined by the section builder, so both paths give the same sections.
+
 What this changes: large files convert at **~0.2 s per page**, about 4x faster than the small-file estimate, so one trader's 6,000 pages is ~20 minutes in one process. OCR on digital pages costs almost nothing (Docling only OCRs image regions), so strategy 3 matters little. Small slices cost more per page than large ones (fixed overhead per call), so shards should be ~25-50 pages, not smaller. Each worker needs 1-2 GB of memory.
 
 ## Part 1 · Docling conversion: strategies

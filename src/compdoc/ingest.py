@@ -73,20 +73,35 @@ def convert(path: str, fhash: str) -> tuple[DoclingDocument, dict]:
     cached = q1("SELECT * FROM conversions WHERE file_hash=?", (fhash,))
     if cached and cached["docling_json_path"] and Path(cached["docling_json_path"]).exists():
         with span("node", "docling:cache_hit", input={"file_hash": fhash}):
-            return DoclingDocument.load_from_json(Path(cached["docling_json_path"])), cached
-    with span("node", "docling:convert", input={"path": Path(path).name}) as s:
+            row = dict(cached)
+            row["sharding"] = json.loads(cached["qc_json"] or "{}").get("sharding")  # keep the shard report in QC
+            return DoclingDocument.load_from_json(Path(cached["docling_json_path"])), row
+    from .conversion import convert_sharded, should_shard
+    from .observability import record_span
+    sharded = should_shard(path)
+    with span("node", "docling:convert_sharded" if sharded else "docling:convert", input={"path": Path(path).name}) as s:
         t0 = time.perf_counter()
-        res = _converter().convert(path)
+        sharding = None
+        if sharded:
+            def on_shard(sh):
+                record_span("tool", f"shard {sh.start}-{sh.end}", input={"pages": f"{sh.start}-{sh.end}", "scanned": sh.scanned},
+                            output={"status": sh.status, "worker_pid": sh.worker, "attempts": sh.attempts, "docling": sh.docling_status},
+                            latency_ms=(sh.seconds or 0) * 1000, status="error" if sh.status == "failed" else "ok", error=sh.error)
+            doc, sharding = convert_sharded(path, fhash, on_shard=on_shard)
+            status = sharding["status"]
+        else:
+            res = _converter().convert(path)
+            doc, status = res.document, (res.status.value if hasattr(res.status, "value") else str(res.status))
         secs = round(time.perf_counter() - t0, 2)
-        doc = res.document
         jpath = settings.cache_dir / f"{fhash}.docling.json"
         mpath = settings.cache_dir / f"{fhash}.md"
         doc.save_as_json(jpath)
         mpath.write_text(doc.export_to_markdown())
-        row = {"file_hash": fhash, "status": res.status.value if hasattr(res.status, "value") else str(res.status),
-               "docling_json_path": str(jpath), "markdown_path": str(mpath), "seconds": secs}
-        s.output = {**row, "items": len(doc.texts), "tables": len(doc.tables), "pages": len(doc.pages),
-                    "pipeline": pipeline_options()}
+        row = {"file_hash": fhash, "status": status, "docling_json_path": str(jpath), "markdown_path": str(mpath), "seconds": secs,
+               "sharding": sharding}
+        s.output = {**{k: v for k, v in row.items() if k != "sharding"}, "items": len(doc.texts), "tables": len(doc.tables),
+                    "pages": len(doc.pages), "pipeline": pipeline_options(),
+                    "shards": len(sharding["shards"]) if sharding else 0}
     return doc, row
 
 
@@ -261,6 +276,7 @@ def qc_for(doc: DoclingDocument, row: dict, fmt: str | None, stats: dict) -> dic
     page_sizes = {str(k): {"w": v.size.width, "h": v.size.height} for k, v in (doc.pages or {}).items()}
     qc = {"status": row.get("status"), "pages": len(doc.pages), "tables": len(doc.tables), "text_items": len(doc.texts),
           "ocr_used": fmt == "scan", "low_text_pages": [p for p, n in page_chars.items() if n < 200],
+          "sharding": ({k: v for k, v in row["sharding"].items()} if row.get("sharding") else None),
           "page_sizes": page_sizes, "seconds": row.get("seconds"), **stats}
     flags = []
     if str(qc["status"]).lower() not in ("success", "conversionstatus.success"):
@@ -269,6 +285,8 @@ def qc_for(doc: DoclingDocument, row: dict, fmt: str | None, stats: dict) -> dic
         flags.append("no_sections")
     if stats["unnumbered_after_repair"]:
         flags.append("unnumbered_headings")
+    if row.get("sharding") and (row["sharding"]["pages_missing"] or row["sharding"]["failed_pages"]):
+        flags.append("pages_missing")
     qc["flags"] = flags
     return qc
 
@@ -331,7 +349,13 @@ def ingest_document(doc_id: str, enrich: bool = True, force: bool = False) -> di
 
 def load_sections(doc_id: str) -> list[Section]:
     rows = q("SELECT * FROM sections WHERE doc_id=? ORDER BY ord", (doc_id,))
+    spans: dict[str, list] = {}
+    for sp in q('SELECT s.* FROM section_spans s JOIN sections x ON x.section_id=s.section_id WHERE x.doc_id=? ORDER BY s.start',
+                (doc_id,)):
+        spans.setdefault(sp["section_id"], []).append({"start": sp["start"], "end": sp["end"], "ref": sp["item_ref"], "page": sp["page"],
+                                                       "l": sp["l"], "t": sp["t"], "r": sp["r"], "b": sp["b"], "origin": sp["origin"]})
     return [Section(section_id=r["section_id"], doc_id=r["doc_id"], number=r["number"], heading=r["heading"],
                     path=json.loads(r["path_json"]), level=r["level"], parent_id=r["parent_id"],
                     pages=json.loads(r["pages_json"]), text=r["text"], tables_md=json.loads(r["tables_json"]),
-                    item_refs=json.loads(r["item_refs_json"]), bboxes=json.loads(r["bboxes_json"])) for r in rows]
+                    item_refs=json.loads(r["item_refs_json"]), bboxes=json.loads(r["bboxes_json"]),
+                    spans=spans.get(r["section_id"], [])) for r in rows]

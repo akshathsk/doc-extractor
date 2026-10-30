@@ -157,6 +157,19 @@ def start_run(run_type: str, trader_id: str | None = None, caller: str = "system
                       (status, status, now(), round((time.perf_counter() - t0) * 1000, 1), err, run_id))
 
 
+def record_span(kind: str, name: str, input: Any = None, output: Any = None, latency_ms: float = 0.0, status: str = "ok",
+                error: str | None = None) -> None:
+    """Record a span for work done elsewhere (e.g. a shard converted in a worker process)."""
+    run_id = _run_id.get()
+    if not run_id:
+        return
+    with tx() as c:
+        c.execute("INSERT INTO spans(span_id, run_id, parent_id, kind, name, input_json, output_json, tokens_in, tokens_out, cost,"
+                  " started_at, ended_at, latency_ms, status, error, seq) VALUES (?,?,?,?,?,?,?,0,0,0,?,?,?,?,?,?)",
+                  (uuid.uuid4().hex[:16], run_id, _parent.get(), kind, name, _safe(input), _safe(output), now(), now(),
+                   latency_ms, status, error, next(_seq)))
+
+
 @contextmanager
 def in_run(run_id: str) -> Iterator[None]:
     """Re-attach to a run inside worker threads (LangGraph nodes) so spans land under the right run."""

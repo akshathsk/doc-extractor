@@ -1,0 +1,429 @@
+{
+  "whole": {
+    "seconds": 58.94,
+    "pages": 202,
+    "report": {
+      "status": "success",
+      "init_s": 7.71
+    },
+    "shards": []
+  },
+  "sharded-2w": {
+    "seconds": 76.87,
+    "pages": 202,
+    "report": {
+      "pages": 202,
+      "scanned_pages": 1,
+      "shard_pages": 40,
+      "workers": 2,
+      "pipeline_version": "pv-0395620cdc",
+      "failed_pages": [],
+      "pages_converted": 202,
+      "pages_missing": [],
+      "seconds": 74.03,
+      "status": "success"
+    },
+    "shards": [
+      {
+        "start": 1,
+        "end": 40,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 31.55,
+        "worker": 73706,
+        "error": null
+      },
+      {
+        "start": 41,
+        "end": 80,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 26.41,
+        "worker": 73705,
+        "error": null
+      },
+      {
+        "start": 81,
+        "end": 120,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 21.62,
+        "worker": 73705,
+        "error": null
+      },
+      {
+        "start": 121,
+        "end": 160,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 15.32,
+        "worker": 73706,
+        "error": null
+      },
+      {
+        "start": 161,
+        "end": 200,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 12.28,
+        "worker": 73706,
+        "error": null
+      },
+      {
+        "start": 201,
+        "end": 201,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 0.4,
+        "worker": 73705,
+        "error": null
+      },
+      {
+        "start": 202,
+        "end": 202,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 2.45,
+        "worker": 73705,
+        "error": null
+      }
+    ]
+  },
+  "sharded-4w": {
+    "seconds": 125.67,
+    "pages": 202,
+    "report": {
+      "pages": 202,
+      "scanned_pages": 1,
+      "shard_pages": 40,
+      "workers": 4,
+      "pipeline_version": "pv-0395620cdc",
+      "failed_pages": [],
+      "pages_converted": 202,
+      "pages_missing": [],
+      "seconds": 119.99,
+      "status": "success"
+    },
+    "shards": [
+      {
+        "start": 1,
+        "end": 40,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 85.27,
+        "worker": 75137,
+        "error": null
+      },
+      {
+        "start": 41,
+        "end": 80,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 52.28,
+        "worker": 75136,
+        "error": null
+      },
+      {
+        "start": 81,
+        "end": 120,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 81.24,
+        "worker": 75134,
+        "error": null
+      },
+      {
+        "start": 121,
+        "end": 160,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 75.91,
+        "worker": 75135,
+        "error": null
+      },
+      {
+        "start": 161,
+        "end": 200,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 53.43,
+        "worker": 75136,
+        "error": null
+      },
+      {
+        "start": 201,
+        "end": 201,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 8.13,
+        "worker": 75135,
+        "error": null
+      },
+      {
+        "start": 202,
+        "end": 202,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 21.72,
+        "worker": 75134,
+        "error": null
+      }
+    ]
+  },
+  "fail-once-4w": {
+    "seconds": 156.86,
+    "pages": 202,
+    "report": {
+      "pages": 202,
+      "scanned_pages": 1,
+      "shard_pages": 40,
+      "workers": 4,
+      "pipeline_version": "pv-0395620cdc",
+      "failed_pages": [],
+      "pages_converted": 202,
+      "pages_missing": [],
+      "seconds": 152.69,
+      "status": "success"
+    },
+    "shards": [
+      {
+        "start": 1,
+        "end": 40,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 91.65,
+        "worker": 76811,
+        "error": null
+      },
+      {
+        "start": 41,
+        "end": 80,
+        "status": "done",
+        "attempts": 2,
+        "seconds": 39.65,
+        "worker": 76812,
+        "error": "RuntimeError: injected failure on page 45"
+      },
+      {
+        "start": 81,
+        "end": 120,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 93.22,
+        "worker": 76812,
+        "error": null
+      },
+      {
+        "start": 121,
+        "end": 160,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 126.26,
+        "worker": 76813,
+        "error": null
+      },
+      {
+        "start": 161,
+        "end": 200,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 125.99,
+        "worker": 76814,
+        "error": null
+      },
+      {
+        "start": 201,
+        "end": 201,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 28.4,
+        "worker": 76811,
+        "error": null
+      },
+      {
+        "start": 202,
+        "end": 202,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 7.96,
+        "worker": 76812,
+        "error": null
+      }
+    ]
+  },
+  "fail-always-4w": {
+    "seconds": 213.42,
+    "pages": 201,
+    "report": {
+      "pages": 202,
+      "scanned_pages": 1,
+      "shard_pages": 40,
+      "workers": 4,
+      "pipeline_version": "pv-0395620cdc",
+      "failed_pages": [
+        45
+      ],
+      "pages_converted": 201,
+      "pages_missing": [
+        202
+      ],
+      "seconds": 199.69,
+      "status": "partial_success"
+    },
+    "shards": [
+      {
+        "start": 1,
+        "end": 40,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 137.46,
+        "worker": 78564,
+        "error": null
+      },
+      {
+        "start": 41,
+        "end": 80,
+        "status": "split",
+        "attempts": 3,
+        "seconds": null,
+        "worker": null,
+        "error": "RuntimeError: injected failure on page 45"
+      },
+      {
+        "start": 41,
+        "end": 60,
+        "status": "split",
+        "attempts": 3,
+        "seconds": null,
+        "worker": null,
+        "error": "RuntimeError: injected failure on page 45"
+      },
+      {
+        "start": 41,
+        "end": 50,
+        "status": "split",
+        "attempts": 3,
+        "seconds": null,
+        "worker": null,
+        "error": "RuntimeError: injected failure on page 45"
+      },
+      {
+        "start": 41,
+        "end": 45,
+        "status": "split",
+        "attempts": 3,
+        "seconds": null,
+        "worker": null,
+        "error": "RuntimeError: injected failure on page 45"
+      },
+      {
+        "start": 41,
+        "end": 43,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 9.89,
+        "worker": 78564,
+        "error": null
+      },
+      {
+        "start": 44,
+        "end": 45,
+        "status": "split",
+        "attempts": 3,
+        "seconds": null,
+        "worker": null,
+        "error": "RuntimeError: injected failure on page 45"
+      },
+      {
+        "start": 44,
+        "end": 44,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 3.47,
+        "worker": 78565,
+        "error": null
+      },
+      {
+        "start": 45,
+        "end": 45,
+        "status": "failed",
+        "attempts": 3,
+        "seconds": null,
+        "worker": null,
+        "error": "RuntimeError: injected failure on page 45"
+      },
+      {
+        "start": 46,
+        "end": 50,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 1.94,
+        "worker": 78563,
+        "error": null
+      },
+      {
+        "start": 51,
+        "end": 60,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 9.69,
+        "worker": 78565,
+        "error": null
+      },
+      {
+        "start": 61,
+        "end": 80,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 11.38,
+        "worker": 78563,
+        "error": null
+      },
+      {
+        "start": 81,
+        "end": 120,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 137.52,
+        "worker": 78563,
+        "error": null
+      },
+      {
+        "start": 121,
+        "end": 160,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 139.36,
+        "worker": 78562,
+        "error": null
+      },
+      {
+        "start": 161,
+        "end": 200,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 149.0,
+        "worker": 78565,
+        "error": null
+      },
+      {
+        "start": 201,
+        "end": 201,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 3.78,
+        "worker": 78564,
+        "error": null
+      },
+      {
+        "start": 202,
+        "end": 202,
+        "status": "done",
+        "attempts": 1,
+        "seconds": 6.5,
+        "worker": 78563,
+        "error": null
+      }
+    ]
+  }
+}

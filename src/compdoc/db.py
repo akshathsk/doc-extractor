@@ -45,6 +45,14 @@ CREATE TABLE IF NOT EXISTS section_spans (
   section_id TEXT, start INTEGER, "end" INTEGER, item_ref TEXT, page INTEGER, l REAL, t REAL, r REAL, b REAL, origin TEXT);
 CREATE INDEX IF NOT EXISTS ix_section_spans ON section_spans(section_id);
 
+CREATE TABLE IF NOT EXISTS section_enrichment (
+  section_hash TEXT, prompt_version TEXT, model TEXT, summary TEXT, term_tags_json TEXT, defined_terms_json TEXT,
+  cross_refs_json TEXT, scope_notes_json TEXT, signals_json TEXT, created_at TEXT,
+  PRIMARY KEY (section_hash, prompt_version, model));
+CREATE TABLE IF NOT EXISTS article_enrichment (
+  section_id TEXT PRIMARY KEY, doc_id TEXT, child_hash TEXT, summary TEXT, prompt_version TEXT, model TEXT, created_at TEXT);
+CREATE INDEX IF NOT EXISTS ix_article_enrichment_doc ON article_enrichment(doc_id);
+
 CREATE TABLE IF NOT EXISTS doc_enrichment (
   doc_id TEXT PRIMARY KEY, doc_summary TEXT, terms_covered_json TEXT, effective_date_in_text TEXT,
   doc_scope_note TEXT, model TEXT, prompt_version TEXT, enriched_at TEXT);
@@ -101,6 +109,11 @@ def connect() -> sqlite3.Connection:
         with _init_lock:
             if not _initialised:
                 c.executescript(SCHEMA)
+                for col in ("ALTER TABLE doc_enrichment ADD COLUMN content_hash TEXT",):  # light migrations
+                    try:
+                        c.execute(col)
+                    except sqlite3.OperationalError:
+                        pass
                 c.commit()
                 _initialised = True
     return c

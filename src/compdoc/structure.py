@@ -454,24 +454,26 @@ def build_sections(doc_id: str, doc: DoclingDocument) -> tuple[list[Section], di
             sec.pages += pg
             sec.bboxes += bx
             sec.item_refs.append(n.head_item.self_ref)
-        texts = []
-        offset = 0
+        text = ""
         for kind, payload, item in n.items:
             if kind == "table":
                 sec.tables_md.append(payload)
             else:
-                texts.append(payload)
+                # a paragraph split across a page (or shard) break continues the sentence: join with a space
+                joiner = "" if not text else (" " if not re.search(r"[.;:!?\"\u201d)\]]\s*$", text) else "\n")
+                text += joiner
+                start = len(text)
+                text += payload
                 for p in (getattr(item, "prov", None) or [None]):
                     box = {"page": p.page_no, "l": p.bbox.l, "t": p.bbox.t, "r": p.bbox.r, "b": p.bbox.b,
                            "origin": getattr(p.bbox.coord_origin, "value", str(p.bbox.coord_origin))} if p else {}
-                    sec.spans.append({"start": offset, "end": offset + len(payload), "ref": item.self_ref, **box})
-                offset += len(payload) + 1  # "\n" joiner
+                    sec.spans.append({"start": start, "end": start + len(payload), "ref": item.self_ref, **box})
             if item is not n.head_item:
                 pg, bx = _prov(item)
                 sec.pages += pg
                 sec.bboxes += bx
                 sec.item_refs.append(item.self_ref)
-        sec.text = "\n".join(texts)
+        sec.text = text
         sec.pages = sorted(set(sec.pages))
         sections.append(sec)
     styles = Counter(n.label.style for n in b.nodes if n.label)
